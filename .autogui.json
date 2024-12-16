@@ -1,0 +1,12 @@
+{
+  "position": {
+    "x": 100,
+    "y": 100
+  },
+  "size": {
+    "width": 50,
+    "height": 50
+  },
+  "color": "#FF0000",
+  "opacity": 0.5
+}

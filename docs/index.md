@@ -6,7 +6,7 @@
 [![Poetry](https://img.shields.io/badge/poetry-managed-blue)](https://python-poetry.org/)
 [![PyQt6](https://img.shields.io/badge/GUI-PyQt6-green)](https://www.riverbankcomputing.com/software/pyqt/)
 
-![type:video](https://www.bilibili.com/video/BV11CB5YWEyM/)
+![type:video](https://www.bilibili.com/video/BV11CB5YWEyM/?share_source=copy_web&vd_source=b9b9871eabf8ce54784449562802ad9c)
 
 ## 🎯 特性
 

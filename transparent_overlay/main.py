@@ -56,11 +56,11 @@ class ImageMatchThread(QThread):
                 h, w = self.target_image.shape[:2]
                 x, y = max_loc
                 log.debug(
-                    f"[{t:.2f}s, {max_val:.2f}%] 找到匹配: 位置({x}, {y}), 大小({w}x{h})"
+                    f"[{t:.2f}s, {max_val*100:.2f}%] 找到匹配: 位置({x}, {y}), 大小({w}x{h})"
                 )
                 self.match_found.emit((x, y, w, h))
             else:
-                log.debug(f"[{t:.2f}s, {max_val:.2f}%] 未找到匹配")
+                log.debug(f"[{t:.2f}s, {max_val*100:.2f}%] 未找到匹配")
 
             self.msleep(200)
 
@@ -161,6 +161,9 @@ class TransparentOverlay(QWidget):
             | Qt.WindowType.Tool
             | Qt.WindowType.WindowStaysOnTopHint
         )
+
+        # 设置窗口背景透明
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
 
         # 在 macOS 上特别设置
         if sys.platform == "darwin":
@@ -277,7 +280,7 @@ class TransparentOverlay(QWidget):
             self.target_image = cv2.imread(file_name)
             if self.target_image is not None:
                 h, w = self.target_image.shape[:2]
-                log.info(f"成功加载图片: {w}x{h}")
+                log.info(f"��功加载图片: {w}x{h}")
                 # 设置目标图片并启动匹配线程
                 self.match_thread.set_target(self.target_image)
                 self.match_thread.start()

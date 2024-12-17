@@ -6,11 +6,22 @@
     }
   </style>
   <g class="icon">
-    <!-- Outer circle -->
-    <path d="M16 4C9.373 4 4 9.373 4 16s5.373 12 12 12 12-5.373 12-12S22.627 4 16 4zm0 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S6 21.523 6 16 10.477 6 16 6z"/>
-    <!-- Inner eye shape -->
-    <path d="M16 10c-4.418 0-8 3.582-8 8s3.582 8 8 8 8-3.582 8-8-3.582-8-8-8zm0 2c3.314 0 6 2.686 6 6s-2.686 6-6 6-6-2.686-6-6 2.686-6 6-6z"/>
-    <!-- Center dot -->
-    <circle cx="16" cy="16" r="3"/>
+    <!-- Cat face (main circle) -->
+    <circle cx="16" cy="16" r="13"/>
+    
+    <!-- Cat ears -->
+    <path d="M10 7L13 12L16 7Z"/>
+    <path d="M22 7L19 12L16 7Z"/>
+    
+    <!-- Eyes (white background) -->
+    <circle cx="12" cy="15" r="3.5" fill="white"/>
+    <circle cx="20" cy="15" r="3.5" fill="white"/>
+    
+    <!-- Eye pupils -->
+    <circle cx="12" cy="15" r="1.8"/>
+    <circle cx="20" cy="15" r="1.8"/>
+    
+    <!-- Cute nose -->
+    <path d="M16 18L14 20H18L16 18Z"/>
   </g>
 </svg>

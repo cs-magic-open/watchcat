@@ -1,16 +1,36 @@
 import sys
 import json
+import signal
 from pathlib import Path
 from PyQt6.QtWidgets import QApplication, QWidget
-from PyQt6.QtCore import Qt, QPoint
+from PyQt6.QtCore import Qt, QPoint, QTimer
 from PyQt6.QtGui import QPainter, QColor
 
 class TransparentOverlay(QWidget):
-    def __init__(self):
+    def __init__(self, app):
         super().__init__()
+        self.app = app  # Store reference to QApplication
         self.load_config()
         self.init_ui()
         
+        # Setup signal handling
+        self.setup_signal_handling()
+        
+    def setup_signal_handling(self):
+        """Setup signal handlers for graceful shutdown"""
+        def signal_handler(*args):
+            print("\nReceived termination signal. Closing application...")
+            # Use QTimer to safely quit from the main thread
+            QTimer.singleShot(0, self.app.quit)
+        
+        # Create socket notifier for SIGINT (Ctrl+C)
+        signal.signal(signal.SIGINT, signal_handler)
+        signal.signal(signal.SIGTERM, signal_handler)
+        
+        # Handle SIGTSTP (Ctrl+Z) on Unix-like systems
+        if hasattr(signal, 'SIGTSTP'):
+            signal.signal(signal.SIGTSTP, signal_handler)
+
     def load_config(self):
         config_path = Path.home() / '.autogui.json'
         if config_path.exists():
@@ -71,8 +91,13 @@ class TransparentOverlay(QWidget):
 def main():
     app = QApplication(sys.argv)
     
-    # Create and show the overlay
-    overlay = TransparentOverlay()
+    # Create and show the overlay, passing app reference
+    overlay = TransparentOverlay(app)
+    
+    # Enable processing of keyboard interrupts
+    timer = QTimer()
+    timer.start(500)  # Time in ms
+    timer.timeout.connect(lambda: None)  # Keep event loop running
     
     sys.exit(app.exec())
 

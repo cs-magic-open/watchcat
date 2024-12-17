@@ -2,9 +2,9 @@ import sys
 import json
 import signal
 from pathlib import Path
-from PyQt6.QtWidgets import QApplication, QWidget
+from PyQt6.QtWidgets import QApplication, QWidget, QSystemTrayIcon, QMenu
 from PyQt6.QtCore import Qt, QPoint, QTimer, QRect
-from PyQt6.QtGui import QPainter, QColor, QPen
+from PyQt6.QtGui import QPainter, QColor, QPen, QAction, QIcon
 
 class TransparentOverlay(QWidget):
     def __init__(self, app):
@@ -12,6 +12,7 @@ class TransparentOverlay(QWidget):
         self.app = app  # Store reference to QApplication
         self.load_config()
         self.init_ui()
+        self.setup_tray()
         
         # Setup signal handling
         self.setup_signal_handling()
@@ -97,6 +98,39 @@ class TransparentOverlay(QWidget):
             self.config["size"]["height"] + self.border_width
         )
         painter.drawRect(content_rect)
+
+    def setup_tray(self):
+        """Setup system tray icon and menu"""
+        self.tray = QSystemTrayIcon(self)
+        # 如果没有自定义图标，使用系统默认图标
+        self.tray.setIcon(QIcon.fromTheme("edit-cut"))
+        
+        # Create tray menu
+        menu = QMenu()
+        
+        # Toggle visibility action
+        self.toggle_action = QAction("Hide Draw", menu)
+        self.toggle_action.setCheckable(True)
+        self.toggle_action.setChecked(True)
+        self.toggle_action.triggered.connect(self.toggle_visibility)
+        menu.addAction(self.toggle_action)
+        
+        # Quit action
+        quit_action = QAction("Quit", menu)
+        quit_action.triggered.connect(self.app.quit)
+        menu.addAction(quit_action)
+        
+        self.tray.setContextMenu(menu)
+        self.tray.show()
+    
+    def toggle_visibility(self, checked):
+        """Toggle the overlay visibility"""
+        if checked:
+            self.show()
+            self.toggle_action.setText("Hide Draw")
+        else:
+            self.hide()
+            self.toggle_action.setText("Show Draw")
 
 def main():
     # 在创建 QApplication 之前设置 dock 隐藏

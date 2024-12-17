@@ -30,7 +30,9 @@ pyobjc-framework-cocoa = { version = "^10.3.2", platform = "darwin" }
 pyobjc-framework-quartz = { version = "^10.3.2", platform = "darwin" }
 pyobjc-framework-applicationservices = { version = "^10.3.2", platform = "darwin" }
 pyobjc-framework-coretext = { version = "^10.3.2", platform = "darwin" }
-simpleaudio = { version = "^1.0.4", platform = "darwin" }
+sounddevice = { version = "^0.4.6", platform = "darwin" }
+pyobjus = { version = "^1.2.1", platform = "darwin" }
+rumps = { version = "^0.4.0", platform = "darwin" }
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.0"

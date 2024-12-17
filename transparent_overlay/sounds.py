@@ -1,9 +1,10 @@
 """声音管理模块"""
 import enum
 import numpy as np
-import simpleaudio as sa
+import sounddevice as sd
 from pydub import AudioSegment
 import os
+import time
 
 
 class SoundType(enum.Enum):
@@ -33,8 +34,17 @@ class SoundPlayer:
             numpy.ndarray: 音频数据
         """
         t = np.linspace(0, duration, int(duration * sample_rate), False)
-        note = np.sin(2 * np.pi * frequency * t) * 32767
-        return note.astype(np.int16)
+        note = np.sin(2 * np.pi * frequency * t)
+        return note.astype(np.float32)
+
+    @classmethod
+    def _play_buffer(cls, audio_data, sample_rate=44100):
+        """安全地播放音频缓冲区"""
+        try:
+            sd.play(audio_data, sample_rate, blocking=False)
+        except Exception as e:
+            from transparent_overlay.log import logger
+            logger.warning(f"播放音频失败: {e}")
 
     @classmethod
     def play_sound(cls, sound_type: SoundType, config=None) -> None:
@@ -56,6 +66,49 @@ class SoundPlayer:
             cls.play_mario()
         elif sound_type == SoundType.CUSTOM and config:
             cls.play_custom(config)
+
+    @classmethod
+    def play_beep(cls, frequency: float = 440, duration: float = 0.25) -> None:
+        """播放蜂鸣声
+
+        Args:
+            frequency: 频率 (Hz)，默认 440Hz (标准 A 音)
+            duration: 持续时间 (秒)，默认 0.25 秒
+        """
+        audio = cls.generate_sine_wave(frequency, duration)
+        cls._play_buffer(audio)
+
+    @classmethod
+    def play_success(cls) -> None:
+        """播放成功提示音 (上升音)"""
+        audio1 = cls.generate_sine_wave(440, 0.1)  # A4
+        audio2 = cls.generate_sine_wave(523.25, 0.1)  # C5
+        audio = np.concatenate([audio1, audio2])
+        cls._play_buffer(audio)
+
+    @classmethod
+    def play_error(cls) -> None:
+        """播放错误提示音 (下降音)"""
+        audio1 = cls.generate_sine_wave(440, 0.1)  # A4
+        audio2 = cls.generate_sine_wave(349.23, 0.1)  # F4
+        audio = np.concatenate([audio1, audio2])
+        cls._play_buffer(audio)
+
+    @classmethod
+    def play_mario(cls) -> None:
+        """播放马里奥风格的提示音"""
+        frequencies = [660, 660, 0, 660, 0, 520, 660, 0, 784]
+        durations = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.15]
+        audio_parts = []
+        
+        for freq, dur in zip(frequencies, durations):
+            if freq == 0:  # 静音
+                audio_parts.append(np.zeros(int(dur * 44100), dtype=np.float32))
+            else:
+                audio_parts.append(cls.generate_sine_wave(freq, dur))
+        
+        audio = np.concatenate(audio_parts)
+        cls._play_buffer(audio)
 
     @classmethod
     def play_custom(cls, config) -> None:
@@ -88,70 +141,16 @@ class SoundPlayer:
 
             # 导出为临时文件并播放
             segment = segment.set_channels(1)  # 转换为单声道
-            samples = np.array(segment.get_array_of_samples())
+            samples = np.array(segment.get_array_of_samples(), dtype=np.float32)
             
             # 确保音量适中
             max_sample = np.max(np.abs(samples))
             if max_sample > 0:
-                scale = min(32767 / max_sample, 1.0)
-                samples = (samples * scale).astype(np.int16)
+                samples = samples / max_sample
             
             # 播放音频
-            play_obj = sa.play_buffer(
-                samples,
-                num_channels=1,
-                bytes_per_sample=2,
-                sample_rate=segment.frame_rate
-            )
-            play_obj.stop_on_destroy = True
+            cls._play_buffer(samples, segment.frame_rate)
 
         except Exception as e:
             from transparent_overlay.log import logger
             logger.warning(f"播放自定义音乐失败: {e}")
-
-    @classmethod
-    def play_beep(cls, frequency: float = 440, duration: float = 0.25) -> None:
-        """播放蜂鸣声
-
-        Args:
-            frequency: 频率 (Hz)，默认 440Hz (标准 A 音)
-            duration: 持续时间 (秒)，默认 0.25 秒
-        """
-        audio = cls.generate_sine_wave(frequency, duration)
-        play_obj = sa.play_buffer(audio, 1, 2, 44100)
-        play_obj.stop_on_destroy = True  # 非阻塞播放
-
-    @classmethod
-    def play_success(cls) -> None:
-        """播放成功提示音 (上升音)"""
-        audio1 = cls.generate_sine_wave(440, 0.1)  # A4
-        audio2 = cls.generate_sine_wave(523.25, 0.1)  # C5
-        audio = np.concatenate([audio1, audio2])
-        play_obj = sa.play_buffer(audio, 1, 2, 44100)
-        play_obj.stop_on_destroy = True
-
-    @classmethod
-    def play_error(cls) -> None:
-        """播放错误提示音 (下降音)"""
-        audio1 = cls.generate_sine_wave(440, 0.1)  # A4
-        audio2 = cls.generate_sine_wave(349.23, 0.1)  # F4
-        audio = np.concatenate([audio1, audio2])
-        play_obj = sa.play_buffer(audio, 1, 2, 44100)
-        play_obj.stop_on_destroy = True
-
-    @classmethod
-    def play_mario(cls) -> None:
-        """播放马里奥风格的提示音"""
-        frequencies = [660, 660, 0, 660, 0, 520, 660, 0, 784]
-        durations = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.15]
-        audio_parts = []
-        
-        for freq, dur in zip(frequencies, durations):
-            if freq == 0:  # 静音
-                audio_parts.append(np.zeros(int(dur * 44100), dtype=np.int16))
-            else:
-                audio_parts.append(cls.generate_sine_wave(freq, dur))
-        
-        audio = np.concatenate(audio_parts)
-        play_obj = sa.play_buffer(audio, 1, 2, 44100)
-        play_obj.stop_on_destroy = True

@@ -14,10 +14,11 @@ WatchCat 使用 PyInstaller 进行打包，通过 GitHub Actions 自动构建各
 # 安装项目依赖
 poetry install --with dev
 
-# 使用 PyInstaller 打包
+# 使用 PyInstaller 打包（使用配置文件）
 poetry run pyinstaller watchcat.spec
+```
 
-打包后的文件将在 `dist/WatchCat` 目录下生成。在 macOS 系统上，你可以通过以下两种方式运行打包后的程序：
+打包后的文件将在 `dist/WatchCat` 目录下生成。在 macOS 系统上，你可以通过以下方式运行打包后的程序：
 
 1. 命令行方式：
    ```bash

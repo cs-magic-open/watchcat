@@ -1,14 +1,15 @@
+from math import fabs
+import os
+import platform
+import subprocess
 import time
 
 import cv2
 import numpy as np
-from PyQt6.QtCore import QThread, pyqtSignal
-import platform
-import subprocess
-import os
-
 from notifypy import Notify
-
+from PyQt6.QtCore import QThread, pyqtSignal
+from PyQt6.QtWidgets import QSystemTrayIcon
+from PyQt6.QtGui import QIcon
 from transparent_overlay.log import logger
 from transparent_overlay.sounds import SoundPlayer, SoundType
 
@@ -24,6 +25,10 @@ class ImageMatchThread(QThread):
         self.running = False
         self.last_match = None  # 存储上次匹配位置
         self.last_match_status = False  # 跟踪上一次的匹配状态
+        # 初始化系统托盘图标用于通知
+        self.tray_icon = QSystemTrayIcon()
+        self.tray_icon.setIcon(QIcon())  # 空图标
+        self.tray_icon.show()
 
     def set_target(self, image):
         """设置目标图片"""
@@ -36,13 +41,17 @@ class ImageMatchThread(QThread):
         """跨平台发送系统通知和提示音"""
         # 检查是否启用通知
         if self.config.data.enable_notification:
-            # 使用 notify-py 发送通知（支持 Windows、Linux、macOS）
-            logger.info(f"发送通知: {title} - {message}")
-            notification = Notify()
-            notification.title = title
-            notification.message = message
-            notification.application_name = "Watch Cat"
-            notification.send(block=False)  # 改为非阻塞，避免声音延迟
+            try:
+                # 使用 QSystemTrayIcon 发送通知
+                self.tray_icon.showMessage(
+                    title,
+                    message,
+                    QSystemTrayIcon.MessageIcon.Information,
+                    3000  # 显示3秒
+                )
+                logger.info(f"发送通知: {title} - {message}")
+            except Exception as e:
+                logger.warning(f"通知发送失败: {e}")
 
         # 检查是否启用声音
         if self.config.data.enable_sound:

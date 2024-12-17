@@ -26,7 +26,7 @@ class Size(BaseModel):
     height: int = Field(default=240, description="窗口高度")
 
 class Border(BaseModel):
-    width: int = Field(default=4, description="边框宽度")
+    width: int = Field(default=2, description="边框宽度")
 
 class CustomSound(BaseModel):
     path: Optional[str] = Field(default=None, description="本地音乐文件路径")

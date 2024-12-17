@@ -12,6 +12,8 @@ class GeometryManager:
     def center_window(self):
         """将窗口居中显示"""
         screen = QApplication.primaryScreen().geometry()
+        # 设置一个较小的默认大小
+        self.widget.setGeometry(0, 0, self.config.data.size.width, self.config.data.size.height)
         size = self.widget.geometry()
         x = (screen.width() - size.width()) // 2
         y = (screen.height() - size.height()) // 2

@@ -41,7 +41,7 @@ class ImageMatchThread(QThread):
             notification = Notify()
             notification.title = title
             notification.message = message
-            notification.application_name = "Auto GUI"
+            notification.application_name = "Watch Cat"
             notification.send(block=False)  # 改为非阻塞，避免声音延迟
 
         # 检查是否启用声音

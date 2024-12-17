@@ -74,7 +74,7 @@ class TransparentOverlay(QWidget):
 
     def on_match_found(self, match_result):
         """处理匹配结果"""
-        # 转换���逻辑像素
+        # 转换逻辑像素
         x, y, w, h = [int(v / self.scale_factor) for v in match_result]
 
         # 更新匹配状态信息
@@ -106,7 +106,7 @@ class TransparentOverlay(QWidget):
             app.setActivationPolicy_(AppKit.NSApplicationActivationPolicyRegular)
 
         start_dir = ""
-        if self.config.get("last_image"):
+        if self.config["last_image"]:
             start_dir = str(Path(self.config["last_image"]).parent)
 
         file_name, _ = QFileDialog.getOpenFileName(
@@ -173,3 +173,8 @@ class TransparentOverlay(QWidget):
         # 如果在 macOS 上，强制更新 NSPanel
         if sys.platform == "darwin" and hasattr(self, "_panel"):
             self._panel.display()
+
+    def reload_last_image(self):
+        """Reload the last used image from config"""
+        if self.config["last_image"]:
+            self.load_image(self.config["last_image"])

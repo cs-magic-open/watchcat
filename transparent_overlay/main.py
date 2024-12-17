@@ -1,5 +1,6 @@
 import sys
 
+from loguru import logger
 from PyQt6.QtCore import QTimer
 from PyQt6.QtWidgets import QApplication
 
@@ -7,6 +8,7 @@ from transparent_overlay.TransparentOverlay import TransparentOverlay
 
 
 def main():
+    logger.info("Starting Transparent Overlay")
     # 在创建 QApplication 之前检查权限
     if sys.platform == "darwin":
         import AppKit

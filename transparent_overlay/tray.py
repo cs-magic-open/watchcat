@@ -1,11 +1,17 @@
 from pathlib import Path
+from typing import TYPE_CHECKING
 
-from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import QAction, QMenu, QSystemTrayIcon
+from PyQt6.QtGui import QAction, QIcon
+from PyQt6.QtWidgets import QMenu, QSystemTrayIcon
+
+from transparent_overlay.config import Config
+
+if TYPE_CHECKING:
+    from transparent_overlay.TransparentOverlay import TransparentOverlay
 
 
 class TrayManager:
-    def __init__(self, parent, config):
+    def __init__(self, parent: "TransparentOverlay", config: Config):
         self.parent = parent
         self.config = config
         self.setup_tray()

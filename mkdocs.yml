@@ -2,6 +2,7 @@ site_name: WatchCat Docs
 site_description: Documentation for WatchCat - A transparent overlay window application for desktop automation
 repo_url: https://github.com/cs-magic-open/watchcat
 repo_name: cs-magic-open/watchcat
+site_url: https://cs-magic-open.github.io/watchcat/
 
 theme:
   name: material
@@ -40,8 +41,8 @@ markdown_extensions:
   - pymdownx.tasklist:
       custom_checkbox: true
   - pymdownx.emoji:
-      emoji_index: !!python/name:materialx.emoji.twemoji
-      emoji_generator: !!python/name:materialx.emoji.to_svg
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
 
 nav:
   - 主页: index.md
@@ -56,4 +57,5 @@ nav:
   - 开发:
     - 贡献指南: development/contributing.md
     - 开发环境搭建: development/setup.md
+  - 常见问题: faq.md
   - 更新日志: changelog.md

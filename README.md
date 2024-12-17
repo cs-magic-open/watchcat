@@ -16,7 +16,12 @@
 
 ## 项目简介
 
-WatchCat 是一个基于 PyQt 开发的桌面自动化工具，专注于实时屏幕监控和智能通知功能。本项目旨在解决需要实时监控屏幕特定特征并进行及时通报的应用场景。
+WatchCat 是一个简单易用的屏幕监控工具，专注于帮助用户实时监控屏幕内容并及时获得通知。
+
+主要功能：
+1. 🔍 **选择目标图片**：您可以选择任何想要监控的图片
+2. 👀 **实时监控**：自动比对屏幕内容与目标图片
+3. 🔔 **及时通知**：当发现匹配时，通过系统通知或音频提醒您
 
 > 我开发这个程序的背景，主要是为了解决一些需要实时监控屏幕特定特征然后通报的场景
 >
@@ -33,45 +38,35 @@ WatchCat 是一个基于 PyQt 开发的桌面自动化工具，专注于实时�
 ### 主要特性
 
 - **高性能图像比对**
-
   - 实时屏幕监控
-  - 支持自由选择本地目标图形
-  - 实时屏幕标注功能（受系统限制，不支持在 dock 上方标注）
+  - 支持自定义目标图片
+  - 智能匹配算法
 
-- **多样化通知方式**
+- **多样化通知**
   - 系统通知
-  - 音频通知
-    - 支持预设音频
-    - 支持本地音乐片段选择
-  - 计划支持：邮件通知、微信通知等
+  - 音频提醒（预设音效/自定义音乐）
+  - 更多通知方式开发中
 
-### 技术栈
+- **简单易用**
+  - 直观的图形界面
+  - 托盘图标运行
+  - 低资源占用
 
-- Poetry（依赖管理）
-- PyQt（GUI 框架）
-- Python 3.x
+### 使用场景
 
-WatchCat 使用了自适应的 SVG 图标，能够根据系统主题自动切换颜色：
+1. **网页监控**
+   - 监控网站更新
+   - 等待特定内容出现
+   - 抢购提醒
 
-- 浅色主题：深色图标 (#2c3e50)
-- 深色主题：浅色图标 (#ecf0f1)
+2. **游戏通知**
+   - 监控游戏状态
+   - 提醒重要事件
+   - 自动通知
 
-图标设计采用了简约现代的风格，象征着程序的监控功能。
-
-## 项目愿景
-
-WatchCat 的目标是打造一个通用的"条件监控-通知触发"工具。未来规划：
-
-- 支持多图片同时监控
-- 扩展更多输入比对形式
-- 支持更灵活的比对条件定义
-- 增加更多通知渠道
-
-## 系统要求
-
-- Python 3.x
-- Poetry（依赖管理）
-- macOS（目前仅支持）
+3. **下载完成提醒**
+   - 监控下载状态
+   - 及时获知完成情况
 
 ## 快速开始
 
@@ -92,6 +87,28 @@ poetry install
 poetry run python -m watchcat
 ```
 
+### 基本使用
+
+1. 运行程序，在系统托盘找到猫咪图标
+2. 点击图标打开主界面
+3. 选择要监控的目标图片
+4. 设置通知方式（系统通知/音频）
+5. 点击开始，程序会在后台运行
+6. 当屏幕出现匹配内容时，您会立即收到通知
+
+## 文档
+
+- [在线文档](https://cs-magic-open.github.io/watchcat/)
+- [快速入门](https://cs-magic-open.github.io/watchcat/getting-started/)
+- [使用指南](https://cs-magic-open.github.io/watchcat/guide/basic-usage/)
+- [常见问题](https://cs-magic-open.github.io/watchcat/faq/)
+
+## 系统要求
+
+- Python 3.9+
+- Poetry（依赖管理）
+- macOS 10.15+（目前仅完整支持 macOS，其他平台支持开发中）
+
 ## 参与贡献
 
 我们欢迎所有形式的贡献，无论是新功能、bug 修复还是文档改进：
@@ -100,17 +117,13 @@ poetry run python -m watchcat
 2. 创建您的特性分支 (`git checkout -b feature/AmazingFeature`)
 3. 提交您的改动 (`git commit -m 'Add some AmazingFeature'`)
 4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 开启一个 Pull Request
+5. 提交 Pull Request
 
-## 问题反馈
+## 许可证
 
-如果您在使用过程中遇到任何问题，或有任何功能建议，欢迎：
+本项目采用 MIT 许可证 - 详见 [LICENSE](LICENSE) 文件
 
-- 提交 [Issue](https://github.com/cs-magic-open/watchcat/issues)
-- 提交 [Pull Request](https://github.com/cs-magic-open/watchcat/pulls)
+## 联系我们
 
-我们会认真查看每一个反馈！
-
-## 开源协议
-
-本项目采用 [MIT](LICENSE) 协议开源。
+- 问题反馈：[GitHub Issues](https://github.com/cs-magic-open/watchcat/issues)
+- 邮件联系：mark@cs-magic.com

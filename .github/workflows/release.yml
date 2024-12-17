@@ -19,14 +19,14 @@ jobs:
         python-version: ["3.11"]
         include:
           - os: windows-latest
-            asset_name: watchcat.exe
-            asset_path: dist/watchcat.exe
+            asset_name: watchcat-windows-${{ github.ref_name }}.exe
+            asset_path: ./dist/watchcat-windows-${{ github.ref_name }}.exe
           - os: ubuntu-latest
-            asset_name: watchcat-linux
-            asset_path: dist/watchcat
+            asset_name: watchcat-linux-${{ github.ref_name }}
+            asset_path: ./dist/watchcat-linux-${{ github.ref_name }}
           - os: macos-latest
-            asset_name: watchcat-macos
-            asset_path: dist/watchcat
+            asset_name: watchcat-macos-${{ github.ref_name }}
+            asset_path: ./dist/watchcat-macos-${{ github.ref_name }}
 
     steps:
       - uses: actions/checkout@v3
@@ -97,19 +97,36 @@ jobs:
 
       - name: Build with PyInstaller
         run: |
-          poetry run pyinstaller --clean --onefile --windowed --name watchcat transparent_overlay/main.py
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            poetry run pyinstaller --clean --onefile --windowed --name watchcat-windows transparent_overlay/main.py
+          elif [ "${{ runner.os }}" = "Linux" ]; then
+            poetry run pyinstaller --clean --onefile --windowed --name watchcat-linux transparent_overlay/main.py
+          else
+            poetry run pyinstaller --clean --onefile --windowed --name watchcat-macos transparent_overlay/main.py
+          fi
+        shell: bash
 
-      - name: Rename Linux/macOS binary
-        if: runner.os != 'Windows'
+      - name: List dist directory
+        run: ls -la dist/
+        shell: bash
+
+      - name: Rename with version
         run: |
-          mv dist/watchcat "dist/${{ matrix.asset_name }}"
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            mv "./dist/watchcat-windows.exe" "./dist/watchcat-windows-${{ github.ref_name }}.exe"
+          elif [ "${{ runner.os }}" = "Linux" ]; then
+            mv "./dist/watchcat-linux" "./dist/watchcat-linux-${{ github.ref_name }}"
+          else
+            mv "./dist/watchcat-macos" "./dist/watchcat-macos-${{ github.ref_name }}"
+          fi
+        shell: bash
 
       - name: Upload Release Asset
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          files: ${{ matrix.asset_path }}
+          files: ./dist/watchcat-*-${{ github.ref_name }}*
           draft: false
           prerelease: ${{ contains(github.ref, '-alpha') || contains(github.ref, '-beta') || contains(github.ref, '-rc') }}
           generate_release_notes: true
@@ -118,8 +135,9 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: watchcat-${{ matrix.os }}
-          path: ${{ matrix.asset_path }}
+          name: ${{ matrix.asset_name }}
+          path: ./dist/watchcat-*-${{ github.ref_name }}*
+          if-no-files-found: error
 
   create-release:
     needs: build

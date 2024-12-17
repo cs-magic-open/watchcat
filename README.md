@@ -1,3 +1,4 @@
+<div style="align: center">
 # <img src="transparent_overlay/resources/icon.svg" width="32" height="32" alt="WatchCat Icon" style="vertical-align: middle" /> WatchCat <img src="transparent_overlay/resources/icon.svg" width="32" height="32" alt="WatchCat Icon" style="vertical-align: middle" />
 
 ```
@@ -12,7 +13,9 @@
   ╰─────────────────────────╯
 ```
 
-完全由 AI 编写的高性能屏幕对比与自动通知工具，支持 MacOS、Windows、Linux。
+> 完全由 AI 编写的高性能屏幕对比与自动通知工具，支持 MacOS、Windows、Linux。
+
+</div>
 
 ## 项目简介
 

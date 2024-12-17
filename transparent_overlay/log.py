@@ -1,3 +1,3 @@
-from loguru import logger as _logger
+from cs_magic_log import setup_logger, LogConfig
 
-logger = _logger
+logger = setup_logger(LogConfig(console_level="DEBUG"))

@@ -2,7 +2,7 @@ import sys
 from pathlib import Path
 
 from mss import mss
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QTimer, QEvent
 from PyQt6.QtWidgets import QFileDialog, QWidget
 
 from .config import Config
@@ -45,16 +45,23 @@ class TransparentOverlay(QWidget):
         self.image_manager.load_last_image()
 
     def init_ui(self):
+        """初始化UI"""
         # 设置基本窗口标志
-        self.setWindowFlags(
-            Qt.WindowType.FramelessWindowHint
+        flags = (
+            Qt.WindowType.WindowStaysOnTopHint
+            | Qt.WindowType.FramelessWindowHint
             | Qt.WindowType.Tool
-            | Qt.WindowType.WindowStaysOnTopHint
-            | Qt.WindowType.WindowDoesNotAcceptFocus
+            | Qt.WindowType.NoDropShadowWindowHint  # 禁用阴影
         )
+        self.setWindowFlags(flags)
 
         # 设置窗口属性
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.setAttribute(Qt.WidgetAttribute.WA_NoSystemBackground)
+        self.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
+        self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
+        self.setAttribute(Qt.WidgetAttribute.WA_WState_ExplicitShowHide, True)
+        self.setAttribute(Qt.WidgetAttribute.WA_UpdatesDisabled, False)  # 确保更新不被禁用
 
         # 设置平台特定的窗口属性
         setup_platform_window(self)
@@ -76,21 +83,66 @@ class TransparentOverlay(QWidget):
         """处理匹配结果"""
         # 转换逻辑像素
         x, y, w, h = [int(v / self.scale_factor) for v in match_result]
+        logger.debug(f"[on_match_found] 匹配结果: ({x}, {y}, {w}, {h})")
 
         # 更新匹配状态信息
         self.last_match_info = (x, y, w, h)
-        self.tray_manager.update_status_text(
-            self.image_manager.target_image, self.last_match_info
-        )
 
         # 更新窗口位置和大小
-        self.geometry_manager.update_geometry(x, y, w, h)
-
-        # 确保窗口可见
+        self.setGeometry(x, y, w, h)
+        
+        # 确保窗口可见并在最前面
         if self.tray_manager.is_visible():
+            # 保存并重新设置窗口标志
+            current_flags = self.windowFlags()
+            self.hide()
+            self.setWindowFlags(current_flags | Qt.WindowType.WindowStaysOnTopHint)
+            
+            # 强制重绘
             self.show()
             self.raise_()
-            self.update()
+            
+            # 使用定时器延迟重绘
+            QTimer.singleShot(50, self._delayed_repaint)
+            QTimer.singleShot(100, self._delayed_repaint)  # 再次尝试，以防第一次失败
+
+    def _delayed_repaint(self):
+        """延迟重绘"""
+        if self.isVisible():
+            logger.debug("执行延迟重绘")
+            self.raise_()
+            self.repaint()
+
+    def paintEvent(self, event):
+        """绘制边框"""
+        logger.debug(f"paintEvent 被调用: event={event}, visible={self.isVisible()}, geometry={self.geometry()}")
+        if not self.isVisible():
+            logger.warning("paintEvent 被调用但窗口不可见")
+            return
+            
+        self.window_painter.paint(event)
+
+        # 如果在 macOS 上，强制更新 NSPanel
+        if sys.platform == "darwin" and hasattr(self, "_panel"):
+            self._panel.display()
+            logger.debug("NSPanel display() 被调用")
+
+    def changeEvent(self, event):
+        """处理窗口状态改变事件"""
+        logger.debug(f"changeEvent: {event.type()}")
+        super().changeEvent(event)
+
+    def event(self, event):
+        """处理所有事件"""
+        from PyQt6.QtCore import QEvent
+        
+        if event.type() == QEvent.Type.WindowActivate:
+            logger.debug("窗口激活")
+            QTimer.singleShot(0, self._delayed_repaint)
+        elif event.type() == QEvent.Type.WindowDeactivate:
+            logger.debug("窗口停用")
+        
+        return super().event(event)
 
     def show_image_picker(self):
         """加载目标图片"""
@@ -126,14 +178,27 @@ class TransparentOverlay(QWidget):
         # 恢复窗口属性和可见性
         self.setWindowFlags(current_flags)
         if was_visible and self.tray_manager.is_visible():
+            self.force_update()  
+
+    def force_update(self):
+        """强制更新窗口"""
+        if self.isVisible() and self.tray_manager.is_visible():
+            self.hide()
             self.show()
             self.raise_()
             self.update()
+            logger.debug("强制更新窗口")
 
-    def toggle_visibility(self, checked):
+    def toggle_visibility(self):
         """切换可见性"""
-        logger.info(f"切换可见性: {checked}")
-        if checked:
+        logger.info(f"切换可见性: {self.isVisible()}")
+        if self.isVisible():
+            if self.image_manager.target_image is not None:
+                self.match_thread.stop()
+                self.match_thread.wait()
+            self.hide()
+            self.tray_manager.toggle_action.setText("Show Draw")
+        else:
             if self.image_manager.target_image is not None:
                 # 先确保线程停止
                 if self.match_thread.isRunning():
@@ -144,12 +209,6 @@ class TransparentOverlay(QWidget):
             self.show()
             self.raise_()
             self.tray_manager.toggle_action.setText("Hide Draw")
-        else:
-            if self.image_manager.target_image is not None:
-                self.match_thread.stop()
-                self.match_thread.wait()
-            self.hide()
-            self.tray_manager.toggle_action.setText("Show Draw")
 
     def closeEvent(self, event):
         """关闭事件处理"""
@@ -165,14 +224,6 @@ class TransparentOverlay(QWidget):
         if hasattr(self, "sct"):
             logger.info("关闭屏幕捕获")
             self.sct.close()
-
-    def paintEvent(self, event):
-        """绘制边框"""
-        self.window_painter.paint(event)
-
-        # 如果在 macOS 上，强制更新 NSPanel
-        if sys.platform == "darwin" and hasattr(self, "_panel"):
-            self._panel.display()
 
     def reload_last_image(self):
         """Reload the last used image from config"""

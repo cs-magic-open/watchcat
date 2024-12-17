@@ -1,6 +1,6 @@
 from PyQt6.QtCore import QRect, Qt
 from PyQt6.QtGui import QColor, QPainter, QPen
-
+from transparent_overlay.log import logger
 
 class WindowPainter:
     def __init__(self, widget, config):
@@ -9,6 +9,7 @@ class WindowPainter:
 
     def paint(self, event):
         """绘制边框"""
+        logger.debug(f"WindowPainter.paint 被调用: widget大小={self.widget.width()}x{self.widget.height()}")
         painter = QPainter(self.widget)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
@@ -30,6 +31,7 @@ class WindowPainter:
             self.widget.height() - self.border_width,
         )
         painter.drawRect(rect)
+        logger.debug(f"绘制边框: rect={rect}, color={self.config['color']}, width={self.border_width}")
 
     @property
     def border_width(self):

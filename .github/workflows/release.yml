@@ -26,13 +26,13 @@ jobs:
       run: |
         curl -sSL https://install.python-poetry.org | python3 -
 
-    - name: Remove macOS-specific dependencies for Linux/Windows
-      if: matrix.os != 'macos-latest'
-      run: |
-        poetry remove --without-dev pyobjc-framework-cocoa pyobjc-framework-quartz pyobjc-framework-applicationservices pyobjc-framework-coretext || true
+    - name: Install dependencies (macOS)
+      if: matrix.os == 'macos-latest'
+      run: poetry install --with dev,macos
 
-    - name: Install dependencies
-      run: poetry install --with dev
+    - name: Install dependencies (Linux/Windows)
+      if: matrix.os != 'macos-latest'
+      run: poetry install --with dev --without macos
       
     - name: Install system dependencies (Ubuntu)
       if: matrix.os == 'ubuntu-latest'

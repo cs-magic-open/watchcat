@@ -13,15 +13,17 @@ PyQt6 = "^6.4.0"
 opencv-python = "^4.8.0"
 numpy = "^1.26.0"
 mss = "^9.0.1"
-pyobjc-framework-cocoa = "^10.3.2"
-pyobjc-framework-quartz = "^10.3.2"
-pyobjc-framework-applicationservices = "^10.3.2"
-pyobjc-framework-coretext = "^10.3.2"
 plyer = "^2.1.0"
 notify-py = "^0.3.43"
 simpleaudio = "^1.0.4"
 pydub = "^0.25.1"
 pydantic = "^2.10.3"
+
+[tool.poetry.group.macos.dependencies]
+pyobjc-framework-cocoa = { version = "^10.3.2", platform = "darwin" }
+pyobjc-framework-quartz = { version = "^10.3.2", platform = "darwin" }
+pyobjc-framework-applicationservices = { version = "^10.3.2", platform = "darwin" }
+pyobjc-framework-coretext = { version = "^10.3.2", platform = "darwin" }
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.0"
@@ -29,7 +31,7 @@ pytest-qt = "^4.2.0"
 
 [tool.poetry.group.dev.dependencies]
 briefcase = "^0.3.20"
-py2app = "^0.28.8"
+py2app = { version = "^0.28.8", platform = "darwin" }
 pyinstaller = "^6.11.1"
 
 [build-system]

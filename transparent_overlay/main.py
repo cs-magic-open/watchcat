@@ -1,4 +1,3 @@
-import signal
 import sys
 
 from PyQt6.QtCore import QTimer
@@ -42,20 +41,6 @@ def main():
     timer = QTimer()
     timer.start(500)
     timer.timeout.connect(lambda: None)
-
-    def signal_handler(signum, frame):
-        """处理退出信号"""
-        from transparent_overlay.log import logger
-
-        logger.info(f"收到信号: {signum}")
-        # 确保清理资源
-        overlay.cleanup()
-        app.quit()
-
-    signal.signal(signal.SIGINT, signal_handler)
-    signal.signal(signal.SIGTERM, signal_handler)
-    # ctrl + z
-    signal.signal(signal.SIGTSTP, signal_handler)
 
     # 使用 try-finally 确保清理
     try:

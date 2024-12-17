@@ -6,7 +6,7 @@ import cairosvg
 
 def convert_svg_icons():
     """将SVG图标转换为各平台所需格式"""
-    svg_path = Path("src/resources/icon.svg")
+    svg_path = Path("resources/icon.svg")
     
     if platform.system() == "Darwin":
         # macOS需要ICNS

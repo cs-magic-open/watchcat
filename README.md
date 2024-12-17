@@ -18,7 +18,9 @@
 
 </div>
 
-## 主要功能
+## 用户指南 👋
+
+### 主要功能
 
 1. 🔍 **选择目标图片**：您可以选择任何想要监控的图片
 2. 👀 **实时监控**：自动比对屏幕内容与目标图片
@@ -61,9 +63,9 @@
    - 监控下载状态
    - 及时获知完成情况
 
-## 快速开始
+### 快速开始
 
-### 安装
+#### 安装
 
 ```bash
 # 克隆仓库
@@ -74,13 +76,13 @@ cd watchcat
 poetry install
 ```
 
-### 运行
+#### 运行
 
 ```bash
 poetry run python -m watchcat
 ```
 
-### 基本使用
+#### 基本使用
 
 1. 运行程序，在系统托盘找到猫咪图标
 2. 点击图标打开主界面
@@ -89,13 +91,23 @@ poetry run python -m watchcat
 5. 点击开始，程序会在后台运行
 6. 当屏幕出现匹配内容时，您会立即收到通知
 
-## 系统要求
+更多使用说明请访问[用户文档](https://cs-magic-open.github.io/watchcat/)
+
+---
+
+## 开发者指南 🛠️
+
+本项目基于：
+- Poetry（包管理）
+- PyQt（界面开发）
+
+### 系统要求
 
 - Python 3.9+
 - Poetry（依赖管理）
 - macOS 10.15+（目前仅完整支持 macOS，其他平台支持开发中）
 
-## 参与贡献
+### 参与贡献
 
 我们欢迎所有形式的贡献，无论是新功能、bug 修复还是文档改进：
 
@@ -105,15 +117,15 @@ poetry run python -m watchcat
 4. 推送到分支 (`git push origin feature/AmazingFeature`)
 5. 提交 Pull Request
 
-## 许可证
+### 许可证
 
 本项目采用 MIT 许可证 - 详见 [LICENSE](LICENSE) 文件
 
-## 联系我们
+### 联系我们
 
 - 问题反馈：[GitHub Issues](https://github.com/cs-magic-open/watchcat/issues)
 - 邮件联系：mark@cs-magic.com
 
-## 更详细的用户文档（不保证更新及时）
+### 🔧 开发者文档
 
-[WatchCat 用户文档](https://cs-magic-open.github.io/watchcat/)
+如果你对项目开发感兴趣，请查看我们的[开发者文档](docs/index.md)，那里包含了详细的技术文档、API 参考和贡献指南。

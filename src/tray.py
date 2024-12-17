@@ -45,21 +45,44 @@ class TrayManager:
 
         menu.addSeparator()
 
+        # 图片操作菜单
+        image_menu = QMenu("图片操作", menu)
+        
         # Select image action
-        select_image_action = QAction("选择目标图片", menu)
+        select_image_action = QAction("选择目标图片", image_menu)
         select_image_action.triggered.connect(self.parent.show_image_picker)
-        menu.addAction(select_image_action)
+        image_menu.addAction(select_image_action)
 
         # Reload last image if available
         if self.config.data.last_image:
-            reload_action = QAction("重新加载上次图片", menu)
+            reload_action = QAction("重新加载上次图片", image_menu)
             reload_action.triggered.connect(self.parent.reload_last_image)
-            menu.addAction(reload_action)
+            image_menu.addAction(reload_action)
+            
+        menu.addMenu(image_menu)
 
         menu.addSeparator()
 
+        # 通知设置菜单
+        notification_menu = QMenu("通知设置", menu)
+        
+
+        # Add notification toggle
+        notification_action = QAction("启用通知", notification_menu)
+        notification_action.setCheckable(True)
+        notification_action.setChecked(self.config.data.enable_notification)
+        notification_action.triggered.connect(self.toggle_notification)
+        notification_menu.addAction(notification_action)
+
+        # Add sound toggle
+        sound_action = QAction("启用声音", notification_menu)
+        sound_action.setCheckable(True)
+        sound_action.setChecked(self.config.data.enable_sound)
+        sound_action.triggered.connect(self.toggle_sound)
+        notification_menu.addAction(sound_action)
+        
         # 添加声音设置子菜单
-        sound_menu = QMenu("提示音设置", menu)
+        sound_menu = QMenu("提示音设置", notification_menu)
         
         # 创建声音选择动作组
         for sound_type in SoundType:
@@ -75,23 +98,11 @@ class TrayManager:
         custom_settings_action.triggered.connect(self.show_custom_sound_settings)
         sound_menu.addAction(custom_settings_action)
         
-        menu.addMenu(sound_menu)
+        notification_menu.addMenu(sound_menu)
+        
+        menu.addMenu(notification_menu)
 
         menu.addSeparator()
-
-        # Add notification toggle
-        notification_action = QAction("启用通知", menu)
-        notification_action.setCheckable(True)
-        notification_action.setChecked(self.config.data.enable_notification)
-        notification_action.triggered.connect(self.toggle_notification)
-        menu.addAction(notification_action)
-
-        # Add sound toggle
-        sound_action = QAction("启用声音", menu)
-        sound_action.setCheckable(True)
-        sound_action.setChecked(self.config.data.enable_sound)
-        sound_action.triggered.connect(self.toggle_sound)
-        menu.addAction(sound_action)
 
         # Toggle visibility action
         self.toggle_action = QAction("Hide Draw", menu)
@@ -100,8 +111,10 @@ class TrayManager:
         self.toggle_action.triggered.connect(self.parent.toggle_visibility)
         menu.addAction(self.toggle_action)
 
+        menu.addSeparator()
+
         # Quit action
-        quit_action = QAction("Quit", menu)
+        quit_action = QAction("退出", menu)
         quit_action.triggered.connect(self.parent.app.quit)
         menu.addAction(quit_action)
 

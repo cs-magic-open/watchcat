@@ -3,8 +3,11 @@ import time
 import cv2
 import numpy as np
 from PyQt6.QtCore import QThread, pyqtSignal
+import platform
 import subprocess
 
+
+from notifypy import Notify
 
 
 from transparent_overlay.log import logger
@@ -29,9 +32,16 @@ class ImageMatchThread(QThread):
         self.last_match = None
 
     def send_notification(self, title, message):
-        """发送系统通知"""
-        apple_script = f'display notification "{message}" with title "{title}"'
-        subprocess.run(['osascript', '-e', apple_script])
+        """跨平台发送系统通知"""
+
+        # 使用 notify-py 发送通知（支持 Windows、Linux、macOS）
+
+        logger.info(f"发送通知: {title} - {message}")
+        notification = Notify()
+        notification.title = title
+        notification.message = message
+        notification.application_name = "Auto GUI"
+        notification.send(block=True)
 
     def run(self):
         """线程主循环"""
@@ -66,10 +76,7 @@ class ImageMatchThread(QThread):
 
                 # 检查是否从未匹配状态转变为匹配状态
                 if not self.last_match_status:
-                    self.send_notification(
-                        "找到匹配",
-                        f"匹配度: {max_val*100:.1f}%"
-                    )
+                    self.send_notification("找到匹配", f"匹配度: {max_val*100:.1f}%")
 
                 self.last_match_status = True
                 self.match_found.emit((x, y, w, h))

@@ -35,6 +35,11 @@ simpleaudio = { version = "^1.0.4", platform = "darwin" }
 pytest = "^7.4.0"
 pytest-qt = "^4.2.0"
 
+[tool.poetry.group.docs.dependencies]
+mkdocs-material = "^9.5.0"
+mkdocs = "^1.5.0"
+pymdown-extensions = "^10.5"
+
 [tool.poetry.group.dev.dependencies]
 briefcase = "^0.3.20"
 py2app = { version = "^0.28.8", platform = "darwin" }

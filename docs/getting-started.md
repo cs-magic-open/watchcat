@@ -1,13 +1,21 @@
 # 快速开始
 
+## 基本功能
+
+WatchCat 是一个简单易用的屏幕监控工具，它可以：
+
+1. 🔍 **选择目标图片**：您可以选择任何想要监控的图片
+2. 👀 **实时监控**：自动比对屏幕内容与目标图片
+3. 🔔 **及时通知**：当发现匹配时，通过系统通知或音频提醒您
+
 ## 环境要求
 
 - Python 3.9+
 - Poetry
 - 操作系统：
-    - Windows 10/11
     - macOS 10.15+
-    - Linux (X11)
+    - Windows 10/11（即将支持）
+    - Linux（即将支持）
 
 ## ⚡️ 安装
 
@@ -20,7 +28,7 @@ cd watchcat
 
 ### 2. 安装依赖
 
-使用Poetry安装所有依赖：
+使用 Poetry 安装所有依赖：
 
 ```bash
 poetry install
@@ -32,57 +40,44 @@ poetry install
 poetry run python -m watchcat
 ```
 
-## 🎮 基本操作
+## 🎮 使用方法
 
 1. **启动应用**
-   - 应用启动后会在系统托盘显示图标
-   - 点击托盘图标可以打开主界面
+   - 运行后会在系统托盘显示猫咪图标
+   - 点击托盘图标打开主界面
 
-2. **创建覆盖窗口**
-   ```python
-   from watchcat import create_overlay
-   
-   overlay = create_overlay()
-   overlay.show()
-   ```
+2. **选择目标图片**
+   - 点击"选择图片"按钮
+   - 从本地选择要监控的图片
 
-3. **设置透明度**
-   ```python
-   overlay.set_opacity(0.5)  # 50%透明度
-   ```
+3. **设置通知方式**
+   - 系统通知：默认启用
+   - 音频提醒：可选择预设音效或本地音乐片段
 
-4. **添加交互元素**
-   ```python
-   from PyQt6.QtWidgets import QPushButton
-   
-   button = QPushButton("Click Me")
-   overlay.add_widget(button)
-   ```
+4. **开始监控**
+   - 点击"开始"按钮
+   - WatchCat 会自动在后台运行
+   - 当屏幕出现与目标图片匹配的内容时，立即通知您
 
-## 🔧 配置
+## 使用技巧
 
-### 基本配置
+1. **选择合适的图片**
+   - 选择特征明显的部分
+   - 避免选择太大或太小的图片
+   - 图片最好有独特的特征
 
-```yaml
-# config.yaml
-window:
-  opacity: 0.7
-  always_on_top: true
-  click_through: false
+2. **通知设置**
+   - 根据场景选择合适的通知方式
+   - 可以同时启用多种通知
+   - 音频通知适合需要立即注意的场景
 
-automation:
-  enabled: true
-  interval: 1000  # ms
-```
-
-### 快捷键设置
-
-- `Ctrl+Shift+H`: 显示/隐藏窗口
-- `Ctrl+Shift+Q`: 退出应用
-- `Ctrl+Shift+R`: 重载配置
+3. **后台运行**
+   - 程序会在系统托盘运行
+   - 不会影响其他工作
+   - 随时可以查看状态
 
 ## 📝 下一步
 
 - 查看[基本使用](guide/basic-usage.md)了解更多功能
-- 浏览[API参考](api/qt-interface.md)获取详细接口信息
-- 加入[开发者社区](development/contributing.md)参与贡献
+- 浏览[常见问题](faq.md)获取帮助
+- 通过[问题反馈](https://github.com/cs-magic-open/watchcat/issues)报告问题

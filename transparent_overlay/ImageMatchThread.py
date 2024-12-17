@@ -5,10 +5,10 @@ import numpy as np
 from PyQt6.QtCore import QThread, pyqtSignal
 import platform
 import subprocess
-
+import simpleaudio as sa
+import os
 
 from notifypy import Notify
-
 
 from transparent_overlay.log import logger
 
@@ -32,16 +32,29 @@ class ImageMatchThread(QThread):
         self.last_match = None
 
     def send_notification(self, title, message):
-        """跨平台发送系统通知"""
+        """跨平台发送系统通知和提示音"""
 
         # 使用 notify-py 发送通知（支持 Windows、Linux、macOS）
-
         logger.info(f"发送通知: {title} - {message}")
         notification = Notify()
         notification.title = title
         notification.message = message
         notification.application_name = "Auto GUI"
-        notification.send(block=True)
+        notification.send(block=False)  # 改为非阻塞，避免声音延迟
+
+        # 播放提示音 (使用 simpleaudio 生成蜂鸣声)
+        try:
+            frequency = 440  # 440 Hz 是标准 A 音
+            seconds = 0.25
+            sample_rate = 44100
+            t = np.linspace(0, seconds, int(seconds * sample_rate), False)
+            note = np.sin(2 * np.pi * frequency * t) * 32767
+            audio = note.astype(np.int16)
+            play_obj = sa.play_buffer(audio, 1, 2, sample_rate)
+            # 非阻塞播放
+            play_obj.stop_on_destroy = True
+        except Exception as e:
+            logger.warning(f"播放提示音失败: {e}")
 
     def run(self):
         """线程主循环"""

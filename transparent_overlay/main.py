@@ -85,47 +85,6 @@ class TransparentOverlay(QWidget):
         # 显示窗口
         self.show()
         
-        # 等待窗口创建完成后设置原生窗口属性
-        QTimer.singleShot(0, self.setup_native_window)
-
-    def setup_native_window(self):
-        """Setup native window properties after window is created"""
-        if sys.platform == 'darwin':
-            try:
-                from Foundation import NSWindow
-                import AppKit
-                
-                # 获取原生窗口句柄
-                window = self.windowHandle()
-                if window and hasattr(window, 'winId'):
-                    native_window = window.winId()
-                    if hasattr(native_window, 'setCollectionBehavior_'):
-                        # 设置窗口行为
-                        native_window.setCollectionBehavior_(
-                            AppKit.NSWindowCollectionBehaviorCanJoinAllSpaces |
-                            AppKit.NSWindowCollectionBehaviorTransient |
-                            AppKit.NSWindowCollectionBehaviorIgnoresCycle
-                        )
-                        
-                        # 设置窗口层级为状态项层级
-                        native_window.setLevel_(AppKit.NSStatusWindowLevel)
-                        
-                        # 禁用窗口阴影
-                        native_window.setHasShadow_(False)
-                        
-                        # 设置窗口为非激活状态
-                        native_window.setCanBecomeKeyWindow_(False)
-                        native_window.setCanBecomeMainWindow_(False)
-                        
-                        # 允许窗口显示但不接受任何输入
-                        native_window.setIgnoresMouseEvents_(True)
-                        native_window.setAcceptsMouseMovedEvents_(False)
-                        
-                        # 确保窗口始终可见
-                        native_window.setOpaque_(False)
-                        native_window.setBackgroundColor_(AppKit.NSColor.clearColor())
-            except Exception as e:
-                print(f"Warning: Could not set all native window properties: {e}")
 
     def paintEvent(self, event):
         painter = QPainter(self)

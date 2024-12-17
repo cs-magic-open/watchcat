@@ -63,14 +63,14 @@ poetry shell
 
 ```json
 {
-    "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
-    "python.formatting.provider": "black",
-    "python.linting.enabled": true,
-    "python.linting.pylintEnabled": true,
-    "python.testing.pytestEnabled": true,
-    "editor.formatOnSave": true,
-    "editor.rulers": [88],
-    "files.trimTrailingWhitespace": true
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+  "python.formatting.provider": "black",
+  "python.linting.enabled": true,
+  "python.linting.pylintEnabled": true,
+  "python.testing.pytestEnabled": true,
+  "editor.formatOnSave": true,
+  "editor.rulers": [88],
+  "files.trimTrailingWhitespace": true
 }
 ```
 
@@ -133,58 +133,26 @@ poetry run mkdocs build
 
 ```json
 {
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Python: Current File",
-            "type": "python",
-            "request": "launch",
-            "program": "${file}",
-            "console": "integratedTerminal",
-            "justMyCode": false
-        },
-        {
-            "name": "Python: WatchCat",
-            "type": "python",
-            "request": "launch",
-            "module": "watchcat",
-            "console": "integratedTerminal",
-            "justMyCode": false
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python: Current File",
+      "type": "python",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "Python: WatchCat",
+      "type": "python",
+      "request": "launch",
+      "module": "watchcat",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    }
+  ]
 }
-```
-
-### 使用日志调试
-
-```python
-from watchcat.logger import logger
-
-def my_function():
-    logger.debug("Debug information")
-    logger.info("Processing...")
-    try:
-        # 你的代码
-        pass
-    except Exception as e:
-        logger.error(f"Error occurred: {e}")
-```
-
-### 性能分析
-
-```python
-import cProfile
-import pstats
-
-def profile_code():
-    profiler = cProfile.Profile()
-    profiler.enable()
-    
-    # 你的代码
-    
-    profiler.disable()
-    stats = pstats.Stats(profiler).sort_stats('cumulative')
-    stats.print_stats()
 ```
 
 ## 常见问题
@@ -217,32 +185,4 @@ from memory_profiler import profile
 def memory_intensive_function():
     # 你的代码
     pass
-```
-
-## 性能优化
-
-### 1. 代码优化
-
-```python
-# 使用生成器而不是列表
-def process_items():
-    return (item for item in items)
-
-# 使用 slots
-class OptimizedClass:
-    __slots__ = ['name', 'value']
-```
-
-### 2. PyQt 优化
-
-```python
-# 避免频繁更新
-self.setUpdatesEnabled(False)
-# 进行更新
-self.setUpdatesEnabled(True)
-
-# 批量处理信号
-self.blockSignals(True)
-# 处理
-self.blockSignals(False)
 ```

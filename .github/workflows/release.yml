@@ -25,8 +25,8 @@ jobs:
             asset_name: watchcat-linux-${{ github.ref_name }}
             asset_path: ./dist/watchcat-linux-${{ github.ref_name }}
           - os: macos-latest
-            asset_name: watchcat-macos-${{ github.ref_name }}
-            asset_path: ./dist/watchcat-macos-${{ github.ref_name }}
+            asset_name: watchcat-macos-${{ github.ref_name }}.dmg
+            asset_path: ./dist/watchcat-macos-${{ github.ref_name }}.dmg
 
     steps:
       - uses: actions/checkout@v3
@@ -117,7 +117,7 @@ jobs:
           elif [ "${{ runner.os }}" = "Linux" ]; then
             mv "./dist/watchcat-linux" "./dist/watchcat-linux-${{ github.ref_name }}"
           else
-            mv "./dist/watchcat-macos" "./dist/watchcat-macos-${{ github.ref_name }}"
+            mv "./dist/watchcat-macos" "./dist/watchcat-macos-${{ github.ref_name }}.dmg"
           fi
         shell: bash
 

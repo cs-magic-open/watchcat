@@ -15,18 +15,27 @@ WatchCat 使用 PyInstaller 进行打包，通过 GitHub Actions 自动构建各
 poetry install --with dev
 
 # 使用 PyInstaller 打包
-poetry run pyinstaller --clean --onefile --windowed transparent_overlay/main.py
+poetry run pyinstaller watchcat.spec
 
-打包后的文件将在 `dist` 目录下生成。在 macOS 系统上，你可以通过以下两种方式运行打包后的程序：
+打包后的文件将在 `dist/WatchCat` 目录下生成。在 macOS 系统上，你可以通过以下两种方式运行打包后的程序：
 
 1. 命令行方式：
    ```bash
-   cd dist
-   ./main
+   cd dist/WatchCat
+   ./WatchCat
    ```
 
 2. 图形界面方式：
-   在 Finder 中双击 `main.app` 文件夹
+   在 Finder 中打开 `dist/WatchCat` 目录，双击 `WatchCat` 应用程序
+
+注意：如果遇到通知功能不工作的问题，请确保 `watchcat.spec` 文件中包含了以下配置：
+```python
+datas=[
+    ('default_config.json', '.'),
+    ('resources', 'resources'),
+    ('venv/lib/python3.12/site-packages/notifypy/os_notifiers/binaries/Notificator.app', 'notifypy/os_notifiers/binaries'),
+],
+```
 
 ### 发布新版本
 

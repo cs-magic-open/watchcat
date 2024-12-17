@@ -9,6 +9,7 @@ a = Analysis(
     datas=[
         ('default_config.json', '.'),
         ('resources', 'resources'),
+        ('venv/lib/python3.12/site-packages/notifypy/os_notifiers/binaries/Notificator.app', 'notifypy/os_notifiers/binaries'),
     ],
     hiddenimports=[
         'PyQt6.QtCore',

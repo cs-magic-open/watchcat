@@ -10,6 +10,11 @@ class ImageManager:
         self.config = config
         self.match_thread = match_thread
         self.target_image = None
+        self.tray_manager = None
+
+    def set_tray_manager(self, tray_manager):
+        """Set the tray manager reference"""
+        self.tray_manager = tray_manager
 
     def load_file(self, file_path: str):
         """加载图片并开始匹配"""
@@ -30,6 +35,10 @@ class ImageManager:
             self.config["last_image"] = file_path
             self.config.save()
 
+            # 更新托盘状态
+            if self.tray_manager:
+                self.tray_manager.update_status(Path(file_path).name)
+
             # 启动新的匹配线程
             logger.info("启动新的匹配线程")
             self.match_thread.set_target(self.target_image)
@@ -38,6 +47,9 @@ class ImageManager:
             return True
         else:
             logger.error(f"无法加载图片: {file_path}")
+            # 更新托盘状态为无图片
+            if self.tray_manager:
+                self.tray_manager.update_status(None)
             return False
 
     def load_last_image(self):

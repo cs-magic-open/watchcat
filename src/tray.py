@@ -17,6 +17,9 @@ class TrayManager:
         self.parent = parent
         self.config = config
         self.setup_tray()
+        # Initialize status based on config
+        if self.config.data.last_image:
+            self.update_status(Path(self.config.data.last_image).name)
 
     def setup_tray(self):
         """Setup system tray icon and menu"""
@@ -136,6 +139,13 @@ class TrayManager:
         
         # 使用定时器延迟显示托盘图标
         QTimer.singleShot(100, self.tray.show)
+
+    def update_status(self, image_name: str = None):
+        """Update the tray status with current image name"""
+        if image_name:
+            self.status_action.setText(f"当前图片: {image_name}")
+        else:
+            self.status_action.setText("当前图片: 无")
 
     def update_status_text(self, target_image, last_match_info):
         """Update status text"""

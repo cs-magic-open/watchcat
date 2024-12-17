@@ -80,6 +80,8 @@ class TransparentOverlay(QWidget):
             self._match_thread.set_tray_manager(self.tray_manager)
         if self._image_manager is None:
             self._image_manager = get_image_manager(self.config, self._match_thread)
+            # 设置托盘管理器
+            self._image_manager.set_tray_manager(self.tray_manager)
 
     @property
     def sct(self):

@@ -67,27 +67,16 @@
 
 #### 安装
 
-```bash
-# 克隆仓库
-git clone https://github.com/cs-magic-open/watchcat.git
-cd watchcat
+1. 访问 [Release 页面](https://github.com/cs-magic-open/watchcat/releases)
+2. 下载最新版本的安装包
+3. 双击运行安装程序
 
-# 安装依赖
-poetry install
-```
-
-#### 运行
-
-```bash
-poetry run python -m watchcat
-```
-
-#### 基本使用
+#### 使用
 
 1. 运行程序，在系统托盘找到猫咪图标
 2. 点击图标打开主界面
 3. 选择要监控的目标图片
-4. 设置通知方式（系统通知/音频）
+4. 设置监控区域和其他参数
 5. 点击开始，程序会在后台运行
 6. 当屏幕出现匹配内容时，您会立即收到通知
 
@@ -106,6 +95,18 @@ poetry run python -m watchcat
 - Python 3.9+
 - Poetry（依赖管理）
 - macOS 10.15+（目前仅完整支持 macOS，其他平台支持开发中）
+
+### 从源码运行
+
+```bash
+# 克隆仓库
+git clone https://github.com/cs-magic-open/watchcat.git
+cd watchcat
+# 安装依赖
+poetry install
+# 运行程序
+poetry run python -m watchcat
+```
 
 ### 参与贡献
 

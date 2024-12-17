@@ -104,12 +104,17 @@ class TrayManager:
 
         menu.addSeparator()
 
-        # Toggle visibility action
-        self.toggle_action = QAction("Hide Draw", menu)
+        # 高级功能菜单
+        advanced_menu = QMenu("高级功能", menu)
+        
+        # 显示匹配框
+        self.toggle_action = QAction("显示匹配框", advanced_menu)
         self.toggle_action.setCheckable(True)
         self.toggle_action.setChecked(True)
         self.toggle_action.triggered.connect(self.parent.toggle_visibility)
-        menu.addAction(self.toggle_action)
+        advanced_menu.addAction(self.toggle_action)
+        
+        menu.addMenu(advanced_menu)
 
         menu.addSeparator()
 

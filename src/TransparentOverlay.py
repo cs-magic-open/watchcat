@@ -193,7 +193,7 @@ class TransparentOverlay(QWidget):
                 self.match_thread.stop()
                 self.match_thread.wait()
             self.hide()
-            self.tray_manager.toggle_action.setText("Show Draw")
+            self.tray_manager.toggle_action.setText("显示匹配框")
         else:
             if self.image_manager.target_image is not None:
                 # 先确保线程停止
@@ -204,7 +204,7 @@ class TransparentOverlay(QWidget):
                 self.match_thread.start()
             self.show()
             self.raise_()
-            self.tray_manager.toggle_action.setText("Hide Draw")
+            self.tray_manager.toggle_action.setText("隐藏匹配框")
 
     def closeEvent(self, event):
         """关闭事件处理"""

@@ -6,8 +6,59 @@ import numpy as np
 from mss import mss
 from pathlib import Path
 from PyQt6.QtWidgets import QApplication, QWidget, QSystemTrayIcon, QMenu, QFileDialog
-from PyQt6.QtCore import Qt, QPoint, QTimer, QRect
+from PyQt6.QtCore import Qt, QPoint, QTimer, QRect, QThread, pyqtSignal
 from PyQt6.QtGui import QPainter, QColor, QPen, QAction, QIcon
+from cs_magic_log import setup_logger, LogConfig
+
+log = setup_logger(LogConfig(
+    log_file=Path.home() / '.autogui.log',
+    console_level='DEBUG',
+))
+
+class ImageMatchThread(QThread):
+    match_found = pyqtSignal(tuple)  # 发送匹配结果的信号 (x, y, w, h)
+    
+    def __init__(self, sct):
+        super().__init__()
+        self.sct = sct
+        self.target_image = None
+        self.running = False
+    
+    def set_target(self, image):
+        """设置目标图片"""
+        h, w = image.shape[:2]
+        log.info(f"设置目标图片: {w}x{h}")
+        self.target_image = image
+    
+    def run(self):
+        """线程主循环"""
+        self.running = True
+        log.info("开始图像匹配线程")
+        while self.running and self.target_image is not None:
+            # 获取屏幕截图
+            screen = self.sct.grab(self.sct.monitors[0])
+            screen_np = np.array(screen)
+            screen_bgr = cv2.cvtColor(screen_np, cv2.COLOR_BGRA2BGR)
+            
+            # 模板匹配
+            result = cv2.matchTemplate(screen_bgr, self.target_image, cv2.TM_CCOEFF_NORMED)
+            _, max_val, _, max_loc = cv2.minMaxLoc(result)
+            
+            if max_val > 0.8:  # 匹配度阈值
+                h, w = self.target_image.shape[:2]
+                x, y = max_loc
+                log.debug(f"找到匹配: 位置({x}, {y}), 相似度: {max_val:.2f}")
+                self.match_found.emit((x, y, w, h))
+            else:
+                log.debug(f"未找到匹配，最大相似度: {max_val:.2f}")
+            
+            self.msleep(200)
+
+    def stop(self):
+        """停止线程"""
+        log.info("停止图像匹配线程")
+        self.running = False
+        self.wait()
 
 class TransparentOverlay(QWidget):
     def __init__(self, app):
@@ -18,12 +69,12 @@ class TransparentOverlay(QWidget):
         self.setup_tray()
         self.setup_signal_handling()
         
-        # 初始化屏幕捕获
+        # 初始化屏幕捕获和匹配线程
         self.sct = mss()
+        self.match_thread = ImageMatchThread(self.sct)
+        self.match_thread.match_found.connect(self.update_window_geometry)
         self.target_image = None
-        self.match_timer = QTimer()
-        self.match_timer.timeout.connect(self.update_match_position)
-        
+
     def setup_signal_handling(self):
         """Setup signal handlers for graceful shutdown"""
         def signal_handler(*args):
@@ -129,17 +180,33 @@ class TransparentOverlay(QWidget):
         self.tray.setContextMenu(menu)
         self.tray.show()
 
+    def update_window_geometry(self, match_result):
+        """更新窗口位置和大小"""
+        x, y, w, h = match_result
+        log.debug(f"更新窗口: 位置({x}, {y}), 大小({w}x{h})")
+        
+        self.config["position"]["x"] = x
+        self.config["position"]["y"] = y
+        self.config["size"]["width"] = w
+        self.config["size"]["height"] = h
+        
+        self.setGeometry(
+            x - self.border_width,
+            y - self.border_width,
+            w + (self.border_width * 2),
+            h + (self.border_width * 2)
+        )
+        self.update()
+
     def load_target_image(self):
         """加载目标图片"""
         if sys.platform == 'darwin':
-            # 临时修改应用程序策略，确保文件对话框能正常显示和激活
             import AppKit
             app = AppKit.NSApplication.sharedApplication()
             original_policy = app.activationPolicy()
             app.setActivationPolicy_(AppKit.NSApplicationActivationPolicyRegular)
-            app.activateIgnoringOtherApps_(True)  # 确保应用程序处于激活状态
+            app.activateIgnoringOtherApps_(True)
         
-        # 使用系统原生文件对话框
         file_name, _ = QFileDialog.getOpenFileName(
             None,
             "选择目标图片",
@@ -149,63 +216,37 @@ class TransparentOverlay(QWidget):
         )
         
         if sys.platform == 'darwin':
-            # 恢复应用程序策略
             app.setActivationPolicy_(original_policy)
         
         if file_name:
+            log.info(f"选择图片: {file_name}")
             self.target_image = cv2.imread(file_name)
             if self.target_image is not None:
-                self.match_timer.start(1000)
-                self.update_match_position()
+                h, w = self.target_image.shape[:2]
+                log.info(f"成功加载图片: {w}x{h}")
+                # 设置目标图片并启动匹配线程
+                self.match_thread.set_target(self.target_image)
+                self.match_thread.start()
             else:
-                print("无法加载图片")
-
-    def update_match_position(self):
-        """更新匹配位置"""
-        if self.target_image is None:
-            return
-            
-        # 获取屏幕截图
-        screen = self.sct.grab(self.sct.monitors[0])
-        screen_np = np.array(screen)
-        screen_bgr = cv2.cvtColor(screen_np, cv2.COLOR_BGRA2BGR)
-        
-        # 模板匹配
-        result = cv2.matchTemplate(screen_bgr, self.target_image, cv2.TM_CCOEFF_NORMED)
-        _, max_val, _, max_loc = cv2.minMaxLoc(result)
-        
-        if max_val > 0.8:  # 匹配度阈值
-            # 更新窗口位置和大小
-            h, w = self.target_image.shape[:2]
-            x, y = max_loc
-            
-            self.config["position"]["x"] = x
-            self.config["position"]["y"] = y
-            self.config["size"]["width"] = w
-            self.config["size"]["height"] = h
-            
-            # 更新窗口几何属性
-            self.setGeometry(
-                x - self.border_width,
-                y - self.border_width,
-                w + (self.border_width * 2),
-                h + (self.border_width * 2)
-            )
-            self.update()
+                log.error(f"无法加载图片: {file_name}")
 
     def toggle_visibility(self, checked):
         """修改切换可见性的逻辑"""
         if checked:
             self.show()
             if self.target_image is not None:
-                self.match_timer.start(1000)
+                self.match_thread.start()
             self.toggle_action.setText("Hide Draw")
-            # 确保窗口保持在最顶层
             self.raise_()
         else:
             self.hide()
-            self.match_timer.stop()
+            self.match_thread.stop()
             self.toggle_action.setText("Show Draw")
+
+    def closeEvent(self, event):
+        """关闭事件处理"""
+        self.match_thread.stop()
+        super().closeEvent(event)
 
 def main():
     # 在创建 QApplication 之前设置 dock 隐藏

@@ -7,6 +7,7 @@ from PyQt6.QtCore import QThread, pyqtSignal
 
 
 import time
+import random
 
 
 class ImageMatchThread(QThread):
@@ -17,12 +18,14 @@ class ImageMatchThread(QThread):
         self.sct = sct
         self.target_image = None
         self.running = False
+        self.last_match = None  # 存储上次匹配位置
 
     def set_target(self, image):
         """设置目标图片"""
         h, w = image.shape[:2]
         logger.info(f"设置目标图片: {w}x{h}")
         self.target_image = image
+        self.last_match = None
 
     def run(self):
         """线程主循环"""
@@ -45,10 +48,23 @@ class ImageMatchThread(QThread):
             if max_val > 0.8:  # 匹配度阈值
                 h, w = self.target_image.shape[:2]
                 x, y = max_loc
+
+                # 如果是首次匹配，保存位置
+                if self.last_match is None:
+                    self.last_match = (x, y)
+
+                # 添加随机抖动 (±20像素)
+                jitter_x = self.last_match[0] + random.randint(100, 200)
+                jitter_y = self.last_match[1] - random.randint(100, 200)
+
                 logger.info(
-                    f"[{t:.2f}s, {max_val*100:.2f}%] 找到匹配: 位置({x}, {y}), 大小({w}x{h})"
+                    f"[{t:.2f}s, {max_val*100:.2f}%] 找到匹配: "
+                    f"原始位置({x}, {y}), 抖动位置({jitter_x}, {jitter_y}), "
+                    f"大小({w}x{h})"
                 )
-                self.match_found.emit((x, y, w, h))
+
+                # 发送抖动后的位置
+                self.match_found.emit((jitter_x, jitter_y, w, h))
             else:
                 logger.warning(f"[{t:.2f}s, {max_val*100:.2f}%] 未找到匹配")
 

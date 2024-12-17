@@ -4,7 +4,7 @@ import signal
 from pathlib import Path
 from PyQt6.QtWidgets import QApplication, QWidget
 from PyQt6.QtCore import Qt, QPoint, QTimer
-from PyQt6.QtGui import QPainter, QColor
+from PyQt6.QtGui import QPainter, QColor, QPen
 
 class TransparentOverlay(QWidget):
     def __init__(self, app):
@@ -32,27 +32,15 @@ class TransparentOverlay(QWidget):
             signal.signal(signal.SIGTSTP, signal_handler)
 
     def load_config(self):
+        """
+        todo: better config management
+        """
         config_path = Path.home() / '.autogui.json'
-        if config_path.exists():
-            with open(config_path) as f:
-                self.config = json.load(f)
-        else:
-            # Default configuration
-            self.config = {
-                "position": {
-                    "x": 100,
-                    "y": 100
-                },
-                "size": {
-                    "width": 50,
-                    "height": 50
-                },
-                "color": "#FF0000",
-                "opacity": 0.5
-            }
-            # Save default config
-            with open(config_path, 'w') as f:
-                json.dump(self.config, f, indent=2)
+        with open(config_path) as f:
+            self.config = json.load(f)
+        print("config: ", self.config)
+
+
 
     def init_ui(self):
         # Set window flags
@@ -67,16 +55,17 @@ class TransparentOverlay(QWidget):
         
         # 在 macOS 上特别设置
         if sys.platform == 'darwin':
-            # 这个必须加，否则就不显示窗口了
             self.setAttribute(Qt.WidgetAttribute.WA_MacAlwaysShowToolWindow)
-            pass
         
-        # Set geometry from config
+        # Calculate border adjustment
+        border_width = self.config['border']['width']  # Should match pen width in paintEvent
+        
+        # Set geometry from config, adjusted for border
         self.setGeometry(
-            self.config["position"]["x"],
-            self.config["position"]["y"],
-            self.config["size"]["width"],
-            self.config["size"]["height"]
+            self.config["position"]["x"] - border_width // 2,
+            self.config["position"]["y"] - border_width // 2,
+            self.config["size"]["width"] + border_width,
+            self.config["size"]["height"] + border_width
         )
         
         # Set window opacity
@@ -90,13 +79,26 @@ class TransparentOverlay(QWidget):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         
-        # Set the color from config
+        # Set the border color from config
         color = QColor(self.config["color"])
-        painter.setBrush(color)
-        painter.setPen(Qt.PenStyle.NoPen)
         
-        # Draw a filled rectangle
-        painter.drawRect(self.rect())
+        # Remove the brush (background fill)
+        painter.setBrush(Qt.BrushStyle.NoBrush)
+        
+        # Set the pen for border
+        pen = QPen(color)
+        pen.setWidth(self.config['border']['width'])
+        painter.setPen(pen)
+        
+        # Draw a rectangle with border only, adjusted to draw border outside
+        pen_width = pen.width()
+        adjusted_rect = self.rect().adjusted(
+            pen_width // 2,      # left: move inward by half pen width
+            pen_width // 2,      # top: move inward by half pen width
+            -pen_width // 2,     # right: move inward by half pen width
+            -pen_width // 2      # bottom: move inward by half pen width
+        )
+        painter.drawRect(adjusted_rect)
 
 def main():
     # 在创建 QApplication 之前设置 dock 隐藏

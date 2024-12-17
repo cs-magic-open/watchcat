@@ -104,7 +104,6 @@ class TransparentOverlay(QWidget):
 
         # 确保窗口可见
         checked = self.toggle_action.isChecked()
-        logger.info(f"切换可见性: {checked}")
         if checked:
             self.show()
             self.raise_()

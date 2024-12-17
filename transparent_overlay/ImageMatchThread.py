@@ -45,12 +45,12 @@ class ImageMatchThread(QThread):
             if max_val > 0.8:  # 匹配度阈值
                 h, w = self.target_image.shape[:2]
                 x, y = max_loc
-                logger.debug(
+                logger.info(
                     f"[{t:.2f}s, {max_val*100:.2f}%] 找到匹配: 位置({x}, {y}), 大小({w}x{h})"
                 )
                 self.match_found.emit((x, y, w, h))
             else:
-                logger.debug(f"[{t:.2f}s, {max_val*100:.2f}%] 未找到匹配")
+                logger.warning(f"[{t:.2f}s, {max_val*100:.2f}%] 未找到匹配")
 
             self.msleep(200)
 

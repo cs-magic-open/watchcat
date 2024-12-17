@@ -1,12 +1,13 @@
-import sys
 import json
 import signal
+import sys
+from pathlib import Path
+
 import cv2
 from mss import mss
-from pathlib import Path
-from PyQt6.QtWidgets import QApplication, QWidget, QSystemTrayIcon, QMenu, QFileDialog
-from PyQt6.QtCore import Qt, QPoint, QTimer, QRect
-from PyQt6.QtGui import QPainter, QColor, QPen, QAction, QIcon
+from PyQt6.QtCore import QRect, Qt, QTimer
+from PyQt6.QtGui import QAction, QColor, QIcon, QPainter, QPen
+from PyQt6.QtWidgets import QApplication, QFileDialog, QMenu, QSystemTrayIcon, QWidget
 
 from transparent_overlay.ImageMatchThread import ImageMatchThread
 from transparent_overlay.log import logger

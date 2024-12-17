@@ -108,15 +108,23 @@ class TrayManager:
         advanced_menu = QMenu("高级功能", menu)
         
         # 显示匹配框
-        self.toggle_action = QAction("显示匹配框", advanced_menu)
+        self.toggle_action = QAction("显示匹配框（不会影响正常点击）", advanced_menu)
         self.toggle_action.setCheckable(True)
         self.toggle_action.setChecked(True)
         self.toggle_action.triggered.connect(self.parent.toggle_visibility)
         advanced_menu.addAction(self.toggle_action)
         
+        # 添加分隔符
+        advanced_menu.addSeparator()
+        
         menu.addMenu(advanced_menu)
 
         menu.addSeparator()
+
+        # 添加关于选项
+        about_action = QAction("关于", menu)
+        about_action.triggered.connect(self.show_about_dialog)
+        menu.addAction(about_action)
 
         # Quit action
         quit_action = QAction("退出", menu)
@@ -200,6 +208,19 @@ class TrayManager:
             # 如果当前选择的是自定义音乐，更新一下设置
             if self.config.data.sound_type == SoundType.CUSTOM.name:
                 self.change_sound_type(SoundType.CUSTOM)
+
+    def show_about_dialog(self):
+        """显示关于对话框"""
+        dialog = AboutDialog(self.parent)
+        
+        # 将对话框移动到屏幕中央
+        screen = self.parent.app.primaryScreen().geometry()
+        dialog_size = dialog.sizeHint()
+        x = screen.center().x() - dialog_size.width() // 2
+        y = screen.center().y() - dialog_size.height() // 2
+        dialog.move(x, y)
+        
+        dialog.exec()
 
 
 class CustomSoundDialog(QDialog):
@@ -318,3 +339,87 @@ class CustomSoundDialog(QDialog):
             "start": self.start_spin.value(),
             "duration": self.duration_spin.value()
         }
+
+
+class AboutDialog(QDialog):
+    """关于对话框"""
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("关于 WatchCat")
+        
+        # 设置窗口标志
+        self.setWindowFlags(
+            Qt.WindowType.Window |
+            Qt.WindowType.WindowStaysOnTopHint
+        )
+        
+        # macOS 特殊处理
+        if sys.platform == "darwin":
+            import AppKit
+            self._app = AppKit.NSApplication.sharedApplication()
+            self._original_activation_policy = self._app.activationPolicy()
+            self._app.setActivationPolicy_(AppKit.NSApplicationActivationPolicyRegular)
+        
+        self.setup_ui()
+    
+    def setup_ui(self):
+        """设置UI"""
+        layout = QVBoxLayout()
+        
+        # 图标
+        icon_label = QLabel()
+        icon_path = str(Path(__file__).parent.parent / "resources" / "icon.svg")
+        if Path(icon_path).exists():
+            pixmap = QPixmap(icon_path)
+            if not pixmap.isNull():
+                icon_label.setPixmap(pixmap.scaled(64, 64, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+        icon_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(icon_label)
+        
+        # 应用名称和版本
+        title_label = QLabel("WatchCat")
+        title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        font = title_label.font()
+        font.setPointSize(16)
+        font.setBold(True)
+        title_label.setFont(font)
+        layout.addWidget(title_label)
+        
+        version_label = QLabel("版本 0.1.0")
+        version_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(version_label)
+        
+        # 描述
+        desc_label = QLabel("一款桌面自动化通知工具，基于透明覆盖窗口技术")
+        desc_label.setWordWrap(True)
+        desc_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(desc_label)
+        
+        # 链接
+        link_label = QLabel('<a href="https://github.com/cs-magic-open/watchcat">GitHub 仓库</a>')
+        link_label.setOpenExternalLinks(True)
+        link_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(link_label)
+        
+        # 版权信息
+        copyright_label = QLabel(" 2024 CS Magic")
+        copyright_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(copyright_label)
+        
+        # 确定按钮
+        button_box = QHBoxLayout()
+        ok_button = QPushButton("确定")
+        ok_button.clicked.connect(self.accept)
+        button_box.addStretch()
+        button_box.addWidget(ok_button)
+        button_box.addStretch()
+        layout.addLayout(button_box)
+        
+        self.setLayout(layout)
+    
+    def closeEvent(self, event):
+        """关闭事件处理"""
+        # 恢复 macOS 的激活策略
+        if sys.platform == "darwin":
+            self._app.setActivationPolicy_(self._original_activation_policy)
+        super().closeEvent(event)

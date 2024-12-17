@@ -1,20 +1,41 @@
 import sys
 from pathlib import Path
 
-from mss import mss
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtWidgets import QFileDialog, QWidget
 
 from .config import Config
 from .geometry_manager import GeometryManager
-from .image_manager import ImageManager
-from .ImageMatchThread import ImageMatchThread
-from .log import logger
-from .platform_window import setup_platform_window
 from .signal_manager import SignalManager
 from .tray import TrayManager
 from .window_painter import WindowPainter
+from .log import logger
 
+# Lazy imports
+_mss = None
+_ImageMatchThread = None
+_ImageManager = None
+
+def get_mss():
+    global _mss
+    if _mss is None:
+        from mss import mss
+        _mss = mss()
+    return _mss
+
+def get_image_match_thread(sct, config):
+    global _ImageMatchThread
+    if _ImageMatchThread is None:
+        from .ImageMatchThread import ImageMatchThread
+        _ImageMatchThread = ImageMatchThread(sct, config)
+    return _ImageMatchThread
+
+def get_image_manager(config, match_thread):
+    global _ImageManager
+    if _ImageManager is None:
+        from .image_manager import ImageManager
+        _ImageManager = ImageManager(config, match_thread)
+    return _ImageManager
 
 class TransparentOverlay(QWidget):
     def __init__(self, app):
@@ -22,14 +43,12 @@ class TransparentOverlay(QWidget):
         self.app = app
         self.scale_factor = app.primaryScreen().devicePixelRatio()
         self.last_match_info = None
+        self._sct = None
+        self._match_thread = None
+        self._image_manager = None
 
-        # Initialize components
+        # Initialize essential components first
         self.config = Config()
-        self.sct = mss()
-        self.match_thread = ImageMatchThread(self.sct, self.config)
-        self.match_thread.match_found.connect(self.on_match_found)
-
-        self.image_manager = ImageManager(self.config, self.match_thread)
         self.window_painter = WindowPainter(self, self.config)
         self.geometry_manager = GeometryManager(self, self.config)
         self.signal_manager = SignalManager(app)
@@ -41,8 +60,39 @@ class TransparentOverlay(QWidget):
         # Setup cleanup
         app.aboutToQuit.connect(self.cleanup)
 
-        # Try loading last image
-        self.image_manager.load_last_image()
+        # Defer loading last image
+        QTimer.singleShot(100, self.delayed_init)
+
+    def delayed_init(self):
+        """延迟初始化较重的组件"""
+        if self.config.data.last_image:
+            self.ensure_components_initialized()
+            self.image_manager.load_last_image()
+
+    def ensure_components_initialized(self):
+        """确保组件已初始化"""
+        if self._sct is None:
+            self._sct = get_mss()
+        if self._match_thread is None:
+            self._match_thread = get_image_match_thread(self._sct, self.config)
+            self._match_thread.match_found.connect(self.on_match_found)
+        if self._image_manager is None:
+            self._image_manager = get_image_manager(self.config, self._match_thread)
+
+    @property
+    def sct(self):
+        self.ensure_components_initialized()
+        return self._sct
+
+    @property
+    def match_thread(self):
+        self.ensure_components_initialized()
+        return self._match_thread
+
+    @property
+    def image_manager(self):
+        self.ensure_components_initialized()
+        return self._image_manager
 
     def init_ui(self):
         """初始化UI"""
@@ -59,6 +109,7 @@ class TransparentOverlay(QWidget):
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)  # 透明背景
 
         # 设置平台特定的窗口属性
+        from .platform_window import setup_platform_window
         setup_platform_window(self)
 
         # 设置位置和大小

@@ -37,7 +37,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-          cache: 'pip'
+          cache: "pip"
 
       - name: Cache Poetry
         uses: actions/cache@v3
@@ -98,11 +98,11 @@ jobs:
       - name: Build with PyInstaller
         run: |
           if [ "${{ runner.os }}" = "Windows" ]; then
-            poetry run pyinstaller --clean --onefile --windowed --name watchcat-windows transparent_overlay/main.py
+            poetry run pyinstaller --clean --onefile --windowed --name watchcat-windows src/main.py
           elif [ "${{ runner.os }}" = "Linux" ]; then
-            poetry run pyinstaller --clean --onefile --windowed --name watchcat-linux transparent_overlay/main.py
+            poetry run pyinstaller --clean --onefile --windowed --name watchcat-linux src/main.py
           else
-            poetry run pyinstaller --clean --onefile --windowed --name watchcat-macos transparent_overlay/main.py
+            poetry run pyinstaller --clean --onefile --windowed --name watchcat-macos src/main.py
           fi
         shell: bash
 

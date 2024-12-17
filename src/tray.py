@@ -6,11 +6,11 @@ from PyQt6.QtGui import QAction, QIcon
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QMenu, QSystemTrayIcon, QFileDialog, QDialog, QVBoxLayout, QHBoxLayout, QLabel, QDoubleSpinBox, QPushButton, QWidget
 
-from transparent_overlay.config import Config
-from transparent_overlay.sounds import SoundType, SoundPlayer
+from src.config import Config
+from src.sounds import SoundType, SoundPlayer
 
 if TYPE_CHECKING:
-    from transparent_overlay.TransparentOverlay import TransparentOverlay
+    from src.TransparentOverlay import TransparentOverlay
 
 
 class TrayManager:

@@ -1,6 +1,6 @@
 from PyQt6.QtCore import QRect, Qt
 from PyQt6.QtGui import QColor, QPainter, QPen
-from transparent_overlay.log import logger
+from src.log import logger
 
 class WindowPainter:
     def __init__(self, widget, config):

@@ -3,7 +3,7 @@ name = "watchcat"
 version = "0.1.0"
 description = "A transparent overlay window application for desktop automation"
 authors = ["mark <mark@cs-magic.com>"]
-packages = [{include = "transparent_overlay"}]
+packages = [{include = "src"}]
 license = "MIT"
 repository = "https://github.com/cs-magic-open/watchcat"
 
@@ -18,6 +18,7 @@ notify-py = "^0.3.43"
 pydub = "^0.25.1"
 pydantic = "^2.10.3"
 mkdocs-video = "^1.5.0"
+cairosvg = "^2.7.1"
 
 [tool.poetry.group.linux.dependencies]
 simpleaudio = { version = "^1.0.4", platform = "linux" }
@@ -47,6 +48,7 @@ pymdown-extensions = "^10.5"
 briefcase = "^0.3.20"
 py2app = { version = "^0.28.8", platform = "darwin" }
 pyinstaller = "^6.11.1"
+cairosvg = "^2.7.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -61,14 +63,14 @@ author = "mark"
 author_email = "mark@cs-magic.com"
 license = "MIT"
 
-[tool.briefcase.app.transparent_overlay]
+[tool.briefcase.app.src]
 formal_name = "WatchCat"
 description = "A transparent overlay window application for desktop automation"
 icon = "resources/icon"
-sources = ["transparent_overlay"]
+sources = ["src"]
 requires = []
 
-[tool.briefcase.app.transparent_overlay.macOS]
+[tool.briefcase.app.src.macOS]
 requires = []
 universal_build = true
 supported = true

@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import QApplication
 
-from transparent_overlay.config import Config
+from src.config import Config
 
 
 class GeometryManager:

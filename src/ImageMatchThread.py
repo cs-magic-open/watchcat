@@ -6,12 +6,11 @@ import time
 
 import cv2
 import numpy as np
-from notifypy import Notify
 from PyQt6.QtCore import QThread, pyqtSignal
 from PyQt6.QtWidgets import QSystemTrayIcon
 from PyQt6.QtGui import QIcon
-from transparent_overlay.log import logger
-from transparent_overlay.sounds import SoundPlayer, SoundType
+from src.log import logger
+from src.sounds import SoundPlayer, SoundType
 
 
 class ImageMatchThread(QThread):

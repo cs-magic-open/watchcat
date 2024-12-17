@@ -4,7 +4,7 @@ from loguru import logger
 from PyQt6.QtCore import QTimer
 from PyQt6.QtWidgets import QApplication
 
-from transparent_overlay.TransparentOverlay import TransparentOverlay
+from src.TransparentOverlay import TransparentOverlay
 
 
 def main():

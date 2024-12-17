@@ -43,7 +43,7 @@ class SoundPlayer:
         try:
             sd.play(audio_data, sample_rate, blocking=False)
         except Exception as e:
-            from transparent_overlay.log import logger
+            from src.log import logger
             logger.warning(f"播放音频失败: {e}")
 
     @classmethod
@@ -152,5 +152,5 @@ class SoundPlayer:
             cls._play_buffer(samples, segment.frame_rate)
 
         except Exception as e:
-            from transparent_overlay.log import logger
+            from src.log import logger
             logger.warning(f"播放自定义音乐失败: {e}")

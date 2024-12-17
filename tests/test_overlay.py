@@ -8,7 +8,7 @@ from PyQt6.QtCore import Qt
 # 添加项目根目录到 Python 路径
 sys.path.append(str(Path(__file__).parent.parent))
 
-from transparent_overlay.TransparentOverlay import TransparentOverlay
+from src.TransparentOverlay import TransparentOverlay
 
 
 @pytest.fixture
@@ -20,9 +20,9 @@ def app():
 @pytest.fixture
 def overlay(app):
     """创建 TransparentOverlay 实例"""
-    with patch("transparent_overlay.main.mss") as mock_mss:
+    with patch("src.main.mss") as mock_mss:
         with patch(
-            "transparent_overlay.main.TransparentOverlay.setup_signal_handling"
+            "src.main.TransparentOverlay.setup_signal_handling"
         ) as mock_signal:
             overlay = TransparentOverlay(app)
             # 模拟配置

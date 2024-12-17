@@ -5,9 +5,12 @@ description = "A transparent overlay window application"
 authors = ["Your Name <your.email@example.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = ">=3.9,<3.13"
 PyQt6 = "^6.4.0"
-pybind11 = "^2.10.0"
+opencv-python = "^4.8.0"
+numpy = "^1.26.0"
+mss = "^9.0.1"
+pyobjc-framework-Cocoa = {version = "^9.2", platform = "darwin"}
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

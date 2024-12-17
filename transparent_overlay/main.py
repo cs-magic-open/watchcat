@@ -1,21 +1,28 @@
 import sys
 import json
 import signal
+import cv2
+import numpy as np
+from mss import mss
 from pathlib import Path
-from PyQt6.QtWidgets import QApplication, QWidget, QSystemTrayIcon, QMenu
+from PyQt6.QtWidgets import QApplication, QWidget, QSystemTrayIcon, QMenu, QFileDialog
 from PyQt6.QtCore import Qt, QPoint, QTimer, QRect
 from PyQt6.QtGui import QPainter, QColor, QPen, QAction, QIcon
 
 class TransparentOverlay(QWidget):
     def __init__(self, app):
         super().__init__()
-        self.app = app  # Store reference to QApplication
+        self.app = app
         self.load_config()
         self.init_ui()
         self.setup_tray()
-        
-        # Setup signal handling
         self.setup_signal_handling()
+        
+        # 初始化屏幕捕获
+        self.sct = mss()
+        self.target_image = None
+        self.match_timer = QTimer()
+        self.match_timer.timeout.connect(self.update_match_position)
         
     def setup_signal_handling(self):
         """Setup signal handlers for graceful shutdown"""
@@ -50,24 +57,20 @@ class TransparentOverlay(QWidget):
         self.setWindowFlags(
             Qt.WindowType.FramelessWindowHint |
             Qt.WindowType.Tool |
-            Qt.WindowType.WindowStaysOnTopHint |
-            Qt.WindowType.WindowDoesNotAcceptFocus |
-            Qt.WindowType.NoDropShadowWindowHint |
-            Qt.WindowType.BypassWindowManagerHint
+            Qt.WindowType.WindowStaysOnTopHint
         )
         
         # 在 macOS 上特别设置
         if sys.platform == 'darwin':
             self.setAttribute(Qt.WidgetAttribute.WA_MacAlwaysShowToolWindow)
-        
-
+            # self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
         
         # Set geometry from config - window size includes border
         self.setGeometry(
-            self.config["position"]["x"] - self.border_width,  # 向左扩展边框宽度
-            self.config["position"]["y"] - self.border_width,  # 向上扩展边框宽度
-            self.config["size"]["width"] + (self.border_width * 2),   # 左右各扩展边框宽度
-            self.config["size"]["height"] + (self.border_width * 2)   # 上下各扩展边框宽度
+            self.config["position"]["x"] - self.border_width,
+            self.config["position"]["y"] - self.border_width,
+            self.config["size"]["width"] + (self.border_width * 2),
+            self.config["size"]["height"] + (self.border_width * 2)
         )
         
         # Set window opacity
@@ -102,11 +105,14 @@ class TransparentOverlay(QWidget):
     def setup_tray(self):
         """Setup system tray icon and menu"""
         self.tray = QSystemTrayIcon(self)
-        # 如果没有自定义图标，使用系统默认图标
         self.tray.setIcon(QIcon.fromTheme("edit-cut"))
         
-        # Create tray menu
         menu = QMenu()
+        
+        # 添加择图片的动作
+        select_image_action = QAction("选择目标图片", menu)
+        select_image_action.triggered.connect(self.load_target_image)
+        menu.addAction(select_image_action)
         
         # Toggle visibility action
         self.toggle_action = QAction("Hide Draw", menu)
@@ -122,14 +128,79 @@ class TransparentOverlay(QWidget):
         
         self.tray.setContextMenu(menu)
         self.tray.show()
-    
+
+    def load_target_image(self):
+        """加载目标图片"""
+        # 临时移除 WindowStaysOnTopHint 标志
+        flags = self.windowFlags()
+        self.setWindowFlags(flags & ~Qt.WindowType.WindowStaysOnTopHint)
+        self.hide()  # 需要先隐藏
+        self.show()  # 再显示，使标志生效
+        
+        file_name, _ = QFileDialog.getOpenFileName(
+            None,
+            "选择目标图片",
+            "",
+            "Images (*.png *.jpg *.jpeg)"
+        )
+        
+        # 恢复 WindowStaysOnTopHint 标志
+        self.setWindowFlags(flags)
+        self.show()
+        
+        if file_name:
+            self.target_image = cv2.imread(file_name)
+            if self.target_image is not None:
+                self.match_timer.start(1000)
+                self.update_match_position()
+            else:
+                print("无法加载图片")
+
+    def update_match_position(self):
+        """更新匹配位置"""
+        if self.target_image is None:
+            return
+            
+        # 获取屏幕截图
+        screen = self.sct.grab(self.sct.monitors[0])
+        screen_np = np.array(screen)
+        screen_bgr = cv2.cvtColor(screen_np, cv2.COLOR_BGRA2BGR)
+        
+        # 模板匹配
+        result = cv2.matchTemplate(screen_bgr, self.target_image, cv2.TM_CCOEFF_NORMED)
+        _, max_val, _, max_loc = cv2.minMaxLoc(result)
+        
+        if max_val > 0.8:  # 匹配度阈值
+            # 更新窗口位置和大小
+            h, w = self.target_image.shape[:2]
+            x, y = max_loc
+            
+            self.config["position"]["x"] = x
+            self.config["position"]["y"] = y
+            self.config["size"]["width"] = w
+            self.config["size"]["height"] = h
+            
+            # 更新窗口几何属性
+            self.setGeometry(
+                x - self.border_width,
+                y - self.border_width,
+                w + (self.border_width * 2),
+                h + (self.border_width * 2)
+            )
+            self.update()
+
     def toggle_visibility(self, checked):
-        """Toggle the overlay visibility"""
+        """修改切换可见性的逻辑"""
         if checked:
             self.show()
+            if self.target_image is not None:
+                self.match_timer.start(1000)
             self.toggle_action.setText("Hide Draw")
+            # 确保窗口保持在最顶层
+            self.raise_()
         else:
             self.hide()
+            self.match_timer.stop()
             self.toggle_action.setText("Show Draw")
 
 def main():

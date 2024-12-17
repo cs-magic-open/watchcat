@@ -38,3 +38,4 @@ ENV/
 
 # Project specific
 examples/target_pattern.png
+.DS_Store

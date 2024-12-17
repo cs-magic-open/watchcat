@@ -1,13 +1,10 @@
-from transparent_overlay.log import logger
-
+import time
 
 import cv2
 import numpy as np
 from PyQt6.QtCore import QThread, pyqtSignal
 
-
-import time
-import random
+from transparent_overlay.log import logger
 
 
 class ImageMatchThread(QThread):
@@ -54,17 +51,16 @@ class ImageMatchThread(QThread):
                     self.last_match = (x, y)
 
                 # 添加随机抖动 (±20像素)
-                jitter_x = self.last_match[0] + random.randint(100, 200)
-                jitter_y = self.last_match[1] - random.randint(0, 100)
+                # x = self.last_match[0] + random.randint(100, 200)
+                # y = self.last_match[1] - random.randint(0, 100)
 
                 logger.info(
                     f"[{t:.2f}s, {max_val*100:.2f}%] 找到匹配: "
-                    f"原始位置({x}, {y}), 抖动位置({jitter_x}, {jitter_y}), "
-                    f"大小({w}x{h})"
+                    f"位置({x}, {y}), 大小({w}x{h})"
                 )
 
                 # 发送抖动后的位置
-                self.match_found.emit((jitter_x, jitter_y, w, h))
+                self.match_found.emit((x, y, w, h))
             else:
                 logger.warning(f"[{t:.2f}s, {max_val*100:.2f}%] 未找到匹配")
 

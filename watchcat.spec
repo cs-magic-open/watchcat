@@ -6,7 +6,10 @@ a = Analysis(
     ['transparent_overlay/main.py'],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=[
+        ('default_config.json', '.'),
+        ('resources', 'resources'),
+    ],
     hiddenimports=[
         'PyQt6.QtCore',
         'PyQt6.QtGui',

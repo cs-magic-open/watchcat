@@ -17,6 +17,7 @@ plyer = "^2.1.0"
 notify-py = "^0.3.43"
 pydub = "^0.25.1"
 pydantic = "^2.10.3"
+mkdocs-video = "^1.5.0"
 
 [tool.poetry.group.linux.dependencies]
 simpleaudio = { version = "^1.0.4", platform = "linux" }

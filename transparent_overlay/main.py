@@ -143,21 +143,19 @@ def main():
     # 在创建 QApplication 之前设置 dock 隐藏
     if sys.platform == 'darwin':
         try:
-            from Foundation import NSBundle
             import AppKit
             
             # 初始化 NSApplication 并设置为后台应用
             app = AppKit.NSApplication.sharedApplication()
+
+            # 要保留这个，否则一闪而过了
             app.setActivationPolicy_(AppKit.NSApplicationActivationPolicyAccessory)
-            
-            # 设置为后台应用
-            info = NSBundle.mainBundle().infoDictionary()
-            info['LSUIElement'] = '1'
-            
-            # 禁用所有默认的应用程序行为
+            # 禁用所有默认的应用程序行为 （不抢占焦点）
             app.setActivationPolicy_(AppKit.NSApplicationActivationPolicyProhibited)
-            NSApp = AppKit.NSApplication.sharedApplication()
-            # NSApp.setPresentsAutomaticallyFullScreen_(False)
+            
+            from Foundation import NSBundle
+            # 不显示在 dock 内
+            NSBundle.mainBundle().infoDictionary()['LSUIElement'] = '1'
             
         except ImportError:
             print("Warning: pyobjc not installed. Please install with: pip install pyobjc-framework-Cocoa")

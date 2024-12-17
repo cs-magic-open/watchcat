@@ -1,4 +1,5 @@
 <div align="center">
+
 # <img src="transparent_overlay/resources/icon.svg" width="32" height="32" alt="WatchCat Icon" style="vertical-align: middle" /> WatchCat <img src="transparent_overlay/resources/icon.svg" width="32" height="32" alt="WatchCat Icon" style="vertical-align: middle" />
 
 ```
@@ -17,11 +18,7 @@
 
 </div>
 
-## 项目简介
-
-WatchCat 是一个简单易用的屏幕监控工具，专注于帮助用户实时监控屏幕内容并及时获得通知。
-
-主要功能：
+## 主要功能
 
 1. 🔍 **选择目标图片**：您可以选择任何想要监控的图片
 2. 👀 **实时监控**：自动比对屏幕内容与目标图片

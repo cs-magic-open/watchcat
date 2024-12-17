@@ -1,0 +1,50 @@
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="eyeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:white;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:white;stop-opacity:0.9" />
+    </linearGradient>
+  </defs>
+  <style>
+    .icon { fill: #2c3e50; }
+    .highlight { fill: white; opacity: 0.15; }
+    @media (prefers-color-scheme: dark) {
+      .icon { fill: #ecf0f1; }
+      .highlight { fill: white; opacity: 0.25; }
+    }
+  </style>
+  <g class="icon">
+    <!-- Cat face -->
+    <path d="M16 4C9.4 4 4 9.4 4 16C4 22.6 9.4 28 16 28C22.6 28 28 22.6 28 16C28 9.4 22.6 4 16 4Z"/>
+    
+    <!-- Cat ears -->
+    <path d="M7 8L11 14L15 8C12.8 8.5 9.2 8.5 7 8Z"/>
+    <path d="M25 8L21 14L17 8C19.2 8.5 22.8 8.5 25 8Z"/>
+    
+    <!-- Inner ear details -->
+    <path class="highlight" d="M8.5 9L11 13L13.5 9Z"/>
+    <path class="highlight" d="M23.5 9L21 13L18.5 9Z"/>
+    
+    <!-- Cat eyes (almond shaped) -->
+    <path fill="url(#eyeGradient)" d="M10 13C8.9 13 8 14.1 8 15.5C8 16.9 8.9 18 10 18C11.1 18 13 16.9 13 15.5C13 14.1 11.1 13 10 13Z"/>
+    <path fill="url(#eyeGradient)" d="M22 13C23.1 13 24 14.1 24 15.5C24 16.9 23.1 18 22 18C20.9 18 19 16.9 19 15.5C19 14.1 20.9 13 22 13Z"/>
+    
+    <!-- Eye pupils (vertical) -->
+    <path d="M10 14C9.4 14 9 14.7 9 15.5C9 16.3 9.4 17 10 17C10.6 17 11 16.3 11 15.5C11 14.7 10.6 14 10 14Z"/>
+    <path d="M22 14C21.4 14 21 14.7 21 15.5C21 16.3 21.4 17 22 17C22.6 17 23 16.3 23 15.5C23 14.7 22.6 14 22 14Z"/>
+    
+    <!-- Eye shine -->
+    <circle cx="9.5" cy="14.5" r="0.5" class="highlight"/>
+    <circle cx="21.5" cy="14.5" r="0.5" class="highlight"/>
+    
+    <!-- Cat nose -->
+    <path d="M15 17L16 18L17 17L16 19Z"/>
+    
+    <!-- Whiskers -->
+    <path stroke="currentColor" stroke-width="0.5" d="M6 15L12 16M6 17L12 17M7 19L12 18"/>
+    <path stroke="currentColor" stroke-width="0.5" d="M26 15L20 16M26 17L20 17M25 19L20 18"/>
+    
+    <!-- Mouth -->
+    <path class="highlight" d="M15 20C15.5 20.8 16.5 20.8 17 20"/>
+  </g>
+</svg>

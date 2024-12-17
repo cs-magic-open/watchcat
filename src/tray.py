@@ -141,6 +141,7 @@ class TrayManager:
     def change_sound_type(self, sound_type: SoundType):
         """更改提示音类型"""
         self.config.data.sound_type = sound_type.name
+        self.config.save()  # 保存配置到磁盘
         
         # 更新菜单项选中状态
         sound_menu = None

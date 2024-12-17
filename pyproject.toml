@@ -3,6 +3,8 @@ name = "transparent-overlay"
 version = "0.1.0"
 description = "A transparent overlay window application"
 authors = ["Your Name <your.email@example.com>"]
+packages = [{include = "transparent_overlay"}]
+license = "LICENSE"
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.13"
@@ -23,6 +25,10 @@ pydub = "^0.25.1"
 pytest = "^7.4.0"
 pytest-qt = "^4.2.0"
 
+
+[tool.poetry.group.dev.dependencies]
+briefcase = "^0.3.20"
+
 [tool.poetry.scripts]
 auto-gui = "transparent_overlay.main:main"
 
@@ -30,6 +36,39 @@ auto-gui = "transparent_overlay.main:main"
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api" 
 
+[tool.briefcase]
+project_name = "Auto GUI"
+bundle = "com.example.autogui"
+version = "0.1.0"
+url = "https://example.com/autogui"
+author = "Your Name"
+author_email = "your.email@example.com"
+license = "MIT"
+
+[tool.briefcase.app.transparent_overlay]
+formal_name = "Auto GUI"
+description = "A transparent overlay window application"
+icon = "resources/icon"
+sources = ["transparent_overlay"]
+test_sources = ["tests"]
+
+requires = [
+    "PyQt6>=6.4.0",
+    "opencv-python>=4.8.0",
+    "numpy>=1.26.0",
+    "mss>=9.0.1",
+    "pyobjc-framework-cocoa>=10.3.2",
+    "pyobjc-framework-quartz>=10.3.2",
+    "pyobjc-framework-applicationservices>=10.3.2",
+    "pyobjc-framework-coretext>=10.3.2",
+    "plyer>=2.1.0",
+    "notify-py>=0.3.43",
+    "simpleaudio>=1.0.4",
+    "pydub>=0.25.1"
+]
+
 [tool.briefcase.app.transparent_overlay.macOS]
 requires = []
-info_plist = "Info.plist" 
+universal_build = true
+supported = true
+minimum_os_version = "10.15"

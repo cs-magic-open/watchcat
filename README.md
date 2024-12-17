@@ -30,6 +30,26 @@ poetry install
 
 ## 打包分发
 
+### 打包为 macOS 应用程序
+
+```bash
+# 安装开发依赖
+poetry install --with dev
+
+# 创建新的应用程序
+briefcase create
+
+# 构建应用程序
+briefcase build
+
+# 打包应用程序
+briefcase package
+
+# 打包完成后会在 macOS/dist 目录下生成 .dmg 安装文件
+```
+
+生成的 .dmg 文件可以直接分发给其他 macOS 用户使用。
+
 ### 使用 Poetry 构建
 
 ```bash

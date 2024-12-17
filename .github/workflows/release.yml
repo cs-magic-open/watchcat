@@ -84,6 +84,17 @@ jobs:
         run: |
           poetry run pyinstaller --clean --onefile --windowed --name watchcat transparent_overlay/main.py
 
+      - name: Upload Release Asset
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          files: |
+            dist/watchcat*
+          draft: false
+          prerelease: ${{ contains(github.ref, '-alpha') || contains(github.ref, '-beta') || contains(github.ref, '-rc') }}
+          generate_release_notes: true
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -94,6 +105,8 @@ jobs:
   create-release:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v3

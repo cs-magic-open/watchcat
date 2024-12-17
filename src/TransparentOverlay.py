@@ -52,10 +52,10 @@ class TransparentOverlay(QWidget):
         self.window_painter = WindowPainter(self, self.config)
         self.geometry_manager = GeometryManager(self, self.config)
         self.signal_manager = SignalManager(app)
+        self.tray_manager = TrayManager(self, self.config)
 
         # Initialize UI
         self.init_ui()
-        self.tray_manager = TrayManager(self, self.config)
 
         # Setup cleanup
         app.aboutToQuit.connect(self.cleanup)
@@ -76,6 +76,8 @@ class TransparentOverlay(QWidget):
         if self._match_thread is None:
             self._match_thread = get_image_match_thread(self._sct, self.config)
             self._match_thread.match_found.connect(self.on_match_found)
+            # 设置托盘管理器
+            self._match_thread.set_tray_manager(self.tray_manager)
         if self._image_manager is None:
             self._image_manager = get_image_manager(self.config, self._match_thread)
 
@@ -113,6 +115,7 @@ class TransparentOverlay(QWidget):
         setup_platform_window(self)
 
         # 设置位置和大小
+        self.ensure_components_initialized()  # Ensure components are initialized first
         if self.image_manager.target_image is None:
             self.geometry_manager.center_window()
         else:

@@ -1,14 +1,15 @@
-from math import fabs
 import os
 import platform
 import subprocess
 import time
+from math import fabs
 
 import cv2
 import numpy as np
 from PyQt6.QtCore import QThread, pyqtSignal
-from PyQt6.QtWidgets import QSystemTrayIcon
 from PyQt6.QtGui import QIcon
+from PyQt6.QtWidgets import QSystemTrayIcon  # 为了使用 MessageIcon 枚举
+
 from src.log import logger
 from src.sounds import SoundPlayer, SoundType
 
@@ -24,10 +25,7 @@ class ImageMatchThread(QThread):
         self.running = False
         self.last_match = None  # 存储上次匹配位置
         self.last_match_status = False  # 跟踪上一次的匹配状态
-        # 初始化系统托盘图标用于通知
-        self.tray_icon = QSystemTrayIcon()
-        self.tray_icon.setIcon(QIcon())  # 空图标
-        self.tray_icon.show()
+        self.tray_manager = None  # 将由外部设置
 
     def set_target(self, image):
         """设置目标图片"""
@@ -36,13 +34,17 @@ class ImageMatchThread(QThread):
         self.target_image = image
         self.last_match = None
 
+    def set_tray_manager(self, tray_manager):
+        """设置托盘管理器"""
+        self.tray_manager = tray_manager
+
     def on_match(self, title, message):
         """跨平台发送系统通知和提示音"""
         # 检查是否启用通知
-        if self.config.data.enable_notification:
+        if self.config.data.enable_notification and self.tray_manager:
             try:
-                # 使用 QSystemTrayIcon 发送通知
-                self.tray_icon.showMessage(
+                # 使用托盘管理器的托盘图标发送通知
+                self.tray_manager.tray.showMessage(
                     title,
                     message,
                     QSystemTrayIcon.MessageIcon.Information,

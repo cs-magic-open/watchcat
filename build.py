@@ -48,7 +48,7 @@ def build_app():
         "--windowed",
         "--clean",
         f"--icon={icon_file}",
-        "--add-data=src/resources:resources",
+        "--add-data=resources:resources",
         "--collect-submodules=src",
         "--noupx",  # 禁用UPX压缩以提升启动速度
         "--noconfirm",  # 自动覆盖输出目录

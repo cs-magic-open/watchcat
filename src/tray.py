@@ -1,9 +1,8 @@
 from pathlib import Path
 from typing import TYPE_CHECKING
 import sys
-
-from PyQt6.QtGui import QAction, QIcon, QPainter, QPixmap, QColor
-from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QAction, QIcon, QPainter, QPixmap, QColor, QPen
+from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtWidgets import QMenu, QSystemTrayIcon, QFileDialog, QDialog, QVBoxLayout, QHBoxLayout, QLabel, QDoubleSpinBox, QPushButton, QWidget
 
 from src.config import Config
@@ -21,36 +20,22 @@ class TrayManager:
 
     def setup_tray(self):
         """Setup system tray icon and menu"""
-        self.tray = QSystemTrayIcon(self.parent)
-        # 加载并设置深色的 SVG 图标
+        # 先准备图标
         icon_path = str(Path(__file__).parent.parent / "resources" / "icon.svg")
+        icon = None
         if Path(icon_path).exists():
-            # 创建原始图标
-            original_icon = QIcon(icon_path)
-            if not original_icon.isNull():
-                # 创建一个新的深色图标，增大尺寸到 32x32
-                pixmap = original_icon.pixmap(32, 32)
-                # 创建一个新的图片并填充为透明
-                new_pixmap = QPixmap(32, 32)
-                new_pixmap.fill(Qt.GlobalColor.transparent)
-                # 创建画笔
-                painter = QPainter(new_pixmap)
-                # 设置混合模式，这样我们可以改变颜色
-                painter.setCompositionMode(QPainter.CompositionMode.CompositionMode_SourceOver)
-                # 设置画笔颜色为黑色
-                painter.setPen(QColor(0, 0, 0))
-                # 绘制原始图标
-                painter.drawPixmap(0, 0, pixmap)
-                painter.end()
-                
-                self.tray.setIcon(QIcon(new_pixmap))
-            else:
+            icon = QIcon(icon_path)
+            if icon.isNull():
                 print(f"Warning: Failed to load icon from {icon_path}")
-                self.tray.setIcon(QIcon.fromTheme("visibility"))
+                icon = QIcon.fromTheme("visibility")
         else:
             print(f"Warning: Icon file not found at {icon_path}")
-            self.tray.setIcon(QIcon.fromTheme("visibility"))
-        
+            icon = QIcon.fromTheme("visibility")
+
+        # 创建托盘图标时直接设置图标
+        self.tray = QSystemTrayIcon(icon, parent=self.parent)
+
+        # 创建菜单
         menu = QMenu()
 
         # Status display
@@ -120,8 +105,11 @@ class TrayManager:
         quit_action.triggered.connect(self.parent.app.quit)
         menu.addAction(quit_action)
 
+        # 设置菜单
         self.tray.setContextMenu(menu)
-        self.tray.show()
+        
+        # 使用定时器延迟显示托盘图标
+        QTimer.singleShot(100, self.tray.show)
 
     def update_status_text(self, target_image, last_match_info):
         """Update status text"""

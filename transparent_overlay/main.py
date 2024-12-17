@@ -31,6 +31,10 @@ class TransparentOverlay(QWidget):
         if hasattr(signal, 'SIGTSTP'):
             signal.signal(signal.SIGTSTP, signal_handler)
 
+    @property
+    def border_width(self):
+        return self.config['border']['width']
+
     def load_config(self):
         """
         todo: better config management
@@ -39,8 +43,6 @@ class TransparentOverlay(QWidget):
         with open(config_path) as f:
             self.config = json.load(f)
         print("config: ", self.config)
-
-
 
     def init_ui(self):
         # Set window flags
@@ -57,15 +59,14 @@ class TransparentOverlay(QWidget):
         if sys.platform == 'darwin':
             self.setAttribute(Qt.WidgetAttribute.WA_MacAlwaysShowToolWindow)
         
-        # Calculate border adjustment - window needs to be larger to accommodate border
-        border_width = self.config['border']['width']
+
         
         # Set geometry from config - window size includes border
         self.setGeometry(
-            self.config["position"]["x"] - border_width,  # 向左扩展边框宽度
-            self.config["position"]["y"] - border_width,  # 向上扩展边框宽度
-            self.config["size"]["width"] + (border_width * 2),   # 左右各扩展边框宽度
-            self.config["size"]["height"] + (border_width * 2)   # 上下各扩展边框宽度
+            self.config["position"]["x"] - self.border_width,  # 向左扩展边框宽度
+            self.config["position"]["y"] - self.border_width,  # 向上扩展边框宽度
+            self.config["size"]["width"] + (self.border_width * 2),   # 左右各扩展边框宽度
+            self.config["size"]["height"] + (self.border_width * 2)   # 上下各扩展边框宽度
         )
         
         # Set window opacity
@@ -84,17 +85,16 @@ class TransparentOverlay(QWidget):
         
         # Set the pen for border
         pen = QPen(color)
-        border_width = self.config['border']['width']
-        pen.setWidth(border_width)
+        pen.setWidth(self.border_width)
         pen.setJoinStyle(Qt.PenJoinStyle.MiterJoin)
         painter.setPen(pen)
         
         # Draw the border exactly at the content box
         content_rect = QRect(
-            border_width // 2,                    # 从边框宽度处开始
-            border_width // 2,
-            self.config["size"]["width"] + border_width,    # 保持原始内容大小
-            self.config["size"]["height"] + border_width
+            self.border_width // 2,                    # 从边框宽度处开始
+            self.border_width // 2,
+            self.config["size"]["width"] + self.border_width,    # 保持原始内容大小
+            self.config["size"]["height"] + self.border_width
         )
         painter.drawRect(content_rect)
 

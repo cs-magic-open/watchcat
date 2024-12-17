@@ -18,6 +18,8 @@
 
 </div>
 
+---
+
 ## 用户指南 👋
 
 ### 主要功能
@@ -87,6 +89,7 @@
 ## 开发者指南 🛠️
 
 本项目基于：
+
 - Poetry（包管理）
 - PyQt（界面开发）
 
@@ -122,11 +125,9 @@ poetry run python -m watchcat
 
 本项目采用 MIT 许可证 - 详见 [LICENSE](LICENSE) 文件
 
-### 联系我们
+---
+
+### 联系我
 
 - 问题反馈：[GitHub Issues](https://github.com/cs-magic-open/watchcat/issues)
 - 邮件联系：mark@cs-magic.com
-
-### 🔧 开发者文档
-
-如果你对项目开发感兴趣，请查看我们的[开发者文档](docs/index.md)，那里包含了详细的技术文档、API 参考和贡献指南。

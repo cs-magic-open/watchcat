@@ -3,7 +3,7 @@ name: Release Build
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 jobs:
   build:
@@ -12,49 +12,48 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.9']
+        python-version: ["3.11"]
 
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
-        
-    - name: Install Poetry
-      run: |
-        curl -sSL https://install.python-poetry.org | python3 -
+      - uses: actions/checkout@v3
 
-    - name: Install system dependencies (Ubuntu)
-      if: matrix.os == 'ubuntu-latest'
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y qt6-base-dev libasound2-dev portaudio19-dev python3-dev
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
 
-    - name: Install system dependencies (Windows)
-      if: matrix.os == 'windows-latest'
-      run: |
-        choco install portaudio
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
 
-    - name: Install dependencies (macOS)
-      if: matrix.os == 'macos-latest'
-      run: poetry install --with dev,macos
+      - name: Install system dependencies (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qt6-base-dev libasound2-dev portaudio19-dev python3-dev
 
-    - name: Install dependencies (Linux/Windows)
-      if: matrix.os != 'macos-latest'
-      run: poetry install --with dev --without macos
-      
-    - name: Build with PyInstaller
-      run: |
-        poetry run pyinstaller --clean --onefile --windowed --name watchcat transparent_overlay/main.py
+      - name: Install dependencies (macOS)
+        if: matrix.os == 'macos-latest'
+        run: poetry install --with dev,macos
 
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: watchcat-${{ matrix.os }}
-        path: |
-          dist/watchcat*
+      - name: Install dependencies (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: poetry install --with dev,linux
+
+      - name: Install dependencies (Windows)
+        if: matrix.os == 'windows-latest'
+        run: poetry install --with dev,windows
+
+      - name: Build with PyInstaller
+        run: |
+          poetry run pyinstaller --clean --onefile --windowed --name watchcat transparent_overlay/main.py
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: watchcat-${{ matrix.os }}
+          path: |
+            dist/watchcat*
 
   create-release:
     needs: build
@@ -62,7 +61,7 @@ jobs:
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v3
-        
+
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v1

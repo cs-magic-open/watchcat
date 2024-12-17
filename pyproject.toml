@@ -15,15 +15,21 @@ numpy = "^1.26.0"
 mss = "^9.0.1"
 plyer = "^2.1.0"
 notify-py = "^0.3.43"
-simpleaudio = "^1.0.4"
 pydub = "^0.25.1"
 pydantic = "^2.10.3"
+
+[tool.poetry.group.linux.dependencies]
+simpleaudio = { version = "^1.0.4", platform = "linux" }
+
+[tool.poetry.group.windows.dependencies]
+sounddevice = { version = "^0.4.6", platform = "win32" }
 
 [tool.poetry.group.macos.dependencies]
 pyobjc-framework-cocoa = { version = "^10.3.2", platform = "darwin" }
 pyobjc-framework-quartz = { version = "^10.3.2", platform = "darwin" }
 pyobjc-framework-applicationservices = { version = "^10.3.2", platform = "darwin" }
 pyobjc-framework-coretext = { version = "^10.3.2", platform = "darwin" }
+simpleaudio = { version = "^1.0.4", platform = "darwin" }
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.0"

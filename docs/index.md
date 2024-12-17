@@ -16,16 +16,6 @@
 - 🔧 可扩展的插件系统
 - 📦 跨平台支持
 
-## 🚀 快速开始
-
-```bash
-# 使用Poetry安装
-poetry install
-
-# 启动应用
-poetry run python -m watchcat
-```
-
 ## 💡 使用场景
 
 - 桌面自动化测试

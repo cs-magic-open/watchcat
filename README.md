@@ -14,7 +14,13 @@
                                    ╰─────────────────────────╯
 ```
 
-> 完全由 AI 编写的高性能屏幕对比与自动通知工具，支持 MacOS、Windows、Linux。
+> 🚀 完全基于 AI 开发的一款桌面自动化通知工具，基于透明覆盖窗口技术
+
+[![GitHub stars](https://img.shields.io/github/stars/cs-magic-open/watchcat?style=social)](https://github.com/cs-magic-open/watchcat)
+[![Poetry](https://img.shields.io/badge/poetry-managed-blue)](https://python-poetry.org/)
+[![PyQt6](https://img.shields.io/badge/GUI-PyQt6-green)](https://www.riverbankcomputing.com/software/pyqt/)
+
+<!-- <iframe src="//player.bilibili.com/player.html?bvid=BV11CB5YWEyM&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="width: 100%; height: 500px;"> </iframe> -->
 
 </div>
 

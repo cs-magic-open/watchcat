@@ -131,30 +131,57 @@ class TransparentOverlay(QWidget):
 
     def load_target_image(self):
         """加载目标图片"""
-        # 临时移除 WindowStaysOnTopHint 标志
-        flags = self.windowFlags()
-        self.setWindowFlags(flags & ~Qt.WindowType.WindowStaysOnTopHint)
-        self.hide()  # 需要先隐藏
-        self.show()  # 再显示，使标志生效
-        
-        file_name, _ = QFileDialog.getOpenFileName(
-            None,
-            "选择目标图片",
-            "",
-            "Images (*.png *.jpg *.jpeg)"
-        )
-        
-        # 恢复 WindowStaysOnTopHint 标志
-        self.setWindowFlags(flags)
-        self.show()
-        
-        if file_name:
-            self.target_image = cv2.imread(file_name)
-            if self.target_image is not None:
-                self.match_timer.start(1000)
-                self.update_match_position()
-            else:
-                print("无法加载图片")
+        if sys.platform == 'darwin':
+            import AppKit
+            
+            # 临时恢复应用程序的激活策略，使对话框能够正常显示
+            app = AppKit.NSApplication.sharedApplication()
+            original_policy = app.activationPolicy()
+            app.setActivationPolicy_(AppKit.NSApplicationActivationPolicyRegular)
+            
+            # 创建并配置文件选择面板
+            panel = AppKit.NSOpenPanel.openPanel()
+            panel.setAllowedFileTypes_(["png", "jpg", "jpeg"])
+            panel.setCanChooseFiles_(True)
+            panel.setCanChooseDirectories_(False)
+            panel.setAllowsMultipleSelection_(False)
+            
+            # 设置面板层级为最顶层
+            panel.setLevel_(AppKit.NSModalPanelWindowLevel)
+            panel.setFloatingPanel_(True)
+            
+            # 激活应用程序窗口
+            app.activateIgnoringOtherApps_(True)
+            
+            result = panel.runModal()
+            
+            # 恢复原来的激活策略
+            app.setActivationPolicy_(original_policy)
+            
+            if result == AppKit.NSModalResponseOK:
+                file_name = panel.URLs()[0].path()
+                self.target_image = cv2.imread(file_name)
+                if self.target_image is not None:
+                    self.match_timer.start(1000)
+                    self.update_match_position()
+                else:
+                    print("无法加载图片")
+        else:
+            # 非 macOS 系统使用 Qt 的文件对话框
+            file_name, _ = QFileDialog.getOpenFileName(
+                None,
+                "选择目标图片",
+                "",
+                "Images (*.png *.jpg *.jpeg)"
+            )
+            
+            if file_name:
+                self.target_image = cv2.imread(file_name)
+                if self.target_image is not None:
+                    self.match_timer.start(1000)
+                    self.update_match_position()
+                else:
+                    print("无法加载图片")
 
     def update_match_position(self):
         """更新匹配位置"""

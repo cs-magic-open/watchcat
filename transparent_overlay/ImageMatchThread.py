@@ -5,20 +5,21 @@ import numpy as np
 from PyQt6.QtCore import QThread, pyqtSignal
 import platform
 import subprocess
-import simpleaudio as sa
 import os
 
 from notifypy import Notify
 
 from transparent_overlay.log import logger
+from transparent_overlay.sounds import SoundPlayer, SoundType
 
 
 class ImageMatchThread(QThread):
     match_found = pyqtSignal(tuple)  # 发送匹配结果的信号 (x, y, w, h)
 
-    def __init__(self, sct):
+    def __init__(self, sct, config):
         super().__init__()
         self.sct = sct
+        self.config = config
         self.target_image = None
         self.running = False
         self.last_match = None  # 存储上次匹配位置
@@ -42,17 +43,10 @@ class ImageMatchThread(QThread):
         notification.application_name = "Auto GUI"
         notification.send(block=False)  # 改为非阻塞，避免声音延迟
 
-        # 播放提示音 (使用 simpleaudio 生成蜂鸣声)
+        # 播放提示音
         try:
-            frequency = 440  # 440 Hz 是标准 A 音
-            seconds = 0.25
-            sample_rate = 44100
-            t = np.linspace(0, seconds, int(seconds * sample_rate), False)
-            note = np.sin(2 * np.pi * frequency * t) * 32767
-            audio = note.astype(np.int16)
-            play_obj = sa.play_buffer(audio, 1, 2, sample_rate)
-            # 非阻塞播放
-            play_obj.stop_on_destroy = True
+            sound_type = SoundType[self.config["sound_type"]]
+            SoundPlayer.play_sound(sound_type)
         except Exception as e:
             logger.warning(f"播放提示音失败: {e}")
 

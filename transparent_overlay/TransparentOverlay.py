@@ -26,7 +26,7 @@ class TransparentOverlay(QWidget):
         # Initialize components
         self.config = Config()
         self.sct = mss()
-        self.match_thread = ImageMatchThread(self.sct)
+        self.match_thread = ImageMatchThread(self.sct, self.config)
         self.match_thread.match_found.connect(self.on_match_found)
 
         self.image_manager = ImageManager(self.config, self.match_thread)

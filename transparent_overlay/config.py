@@ -20,6 +20,7 @@ class Config:
                 "color": "#FF0000",
                 "border": {"width": 4},
                 "last_image": None,
+                "sound_type": "SUCCESS",  # 默认使用成功提示音
             }
 
     def save(self):
@@ -28,7 +29,7 @@ class Config:
             json.dump(self.data, f, indent=2)
 
     def __getitem__(self, key):
-        return self.data[key]
+        return self.data.get(key) or "SUCCESS"
 
     def __setitem__(self, key, value):
         self.data[key] = value

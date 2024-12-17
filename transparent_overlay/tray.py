@@ -5,6 +5,7 @@ from PyQt6.QtGui import QAction, QIcon
 from PyQt6.QtWidgets import QMenu, QSystemTrayIcon
 
 from transparent_overlay.config import Config
+from transparent_overlay.sounds import SoundType
 
 if TYPE_CHECKING:
     from transparent_overlay.TransparentOverlay import TransparentOverlay
@@ -40,6 +41,22 @@ class TrayManager:
             reload_action = QAction("重新加载上次图片", menu)
             reload_action.triggered.connect(self.parent.reload_last_image)
             menu.addAction(reload_action)
+
+        menu.addSeparator()
+
+        # 添加声音设置子菜单
+        sound_menu = QMenu("提示音设置", menu)
+        sound_group = QMenu(sound_menu)
+        
+        # 创建声音选择动作组
+        for sound_type in SoundType:
+            action = QAction(sound_type.value, sound_menu)
+            action.setCheckable(True)
+            action.setChecked(self.config["sound_type"] == sound_type.name)
+            action.triggered.connect(lambda checked, st=sound_type: self.change_sound_type(st))
+            sound_menu.addAction(action)
+        
+        menu.addMenu(sound_menu)
 
         menu.addSeparator()
 
@@ -84,3 +101,18 @@ class TrayManager:
     def set_visible(self, visible):
         """Set the visibility state"""
         self.toggle_action.setChecked(visible)
+
+    def change_sound_type(self, sound_type: SoundType):
+        """更改提示音类型"""
+        self.config["sound_type"] = sound_type.name
+        
+        # 更新菜单项选中状态
+        sound_menu = None
+        for action in self.tray.contextMenu().actions():
+            if action.text() == "提示音设置":
+                sound_menu = action.menu()
+                break
+        
+        if sound_menu:
+            for action in sound_menu.actions():
+                action.setChecked(action.text() == sound_type.value)

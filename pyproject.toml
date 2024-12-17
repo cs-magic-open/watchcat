@@ -13,6 +13,10 @@ mss = "^9.0.1"
 pyobjc-framework-Cocoa = {version = "^9.2", platform = "darwin"}
 cs-magic-log = "^0.1.1"
 
+[tool.poetry.group.test.dependencies]
+pytest = "^7.4.0"
+pytest-qt = "^4.2.0"
+
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api" 

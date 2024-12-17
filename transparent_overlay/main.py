@@ -67,9 +67,9 @@ class TransparentOverlay(QWidget):
         
         # 在 macOS 上特别设置
         if sys.platform == 'darwin':
+            # 这个必须加，否则就不显示窗口了
             self.setAttribute(Qt.WidgetAttribute.WA_MacAlwaysShowToolWindow)
-            self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
-            self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+            pass
         
         # Set geometry from config
         self.setGeometry(

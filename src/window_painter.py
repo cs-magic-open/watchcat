@@ -25,8 +25,8 @@ class WindowPainter:
 
         # 绘制边框
         rect = QRect(
-            self.border_width // 2,
-            self.border_width // 2,
+            self.border_width >> 1,
+            self.border_width >> 1,
             self.widget.width() - self.border_width,
             self.widget.height() - self.border_width,
         )

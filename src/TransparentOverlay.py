@@ -118,13 +118,6 @@ class TransparentOverlay(QWidget):
         self.ensure_components_initialized()  # Ensure components are initialized first
         if self.image_manager.target_image is None:
             self.geometry_manager.center_window()
-        else:
-            self.geometry_manager.update_geometry(
-                self.config["position"]["x"],
-                self.config["position"]["y"],
-                self.config["size"]["width"],
-                self.config["size"]["height"],
-            )
 
         self.show()
 
@@ -133,6 +126,12 @@ class TransparentOverlay(QWidget):
         # 转换逻辑像素
         x, y, w, h = [int(v / self.scale_factor) for v in match_result]
         logger.debug(f"[on_match_found] 匹配结果: ({x}, {y}, {w}, {h})")
+
+        # 增加边框
+        x -= self.config.data.border.width
+        y -= self.config.data.border.width
+        w += self.config.data.border.width * 2
+        h += self.config.data.border.width * 2
 
         # 更新匹配状态信息
         self.last_match_info = (x, y, w, h)

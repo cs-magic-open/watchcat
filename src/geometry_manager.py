@@ -1,10 +1,10 @@
-from PyQt6.QtWidgets import QApplication
+from PyQt6.QtWidgets import QApplication, QWidget
 
 from src.config import Config
 
 
 class GeometryManager:
-    def __init__(self, widget, config: Config):
+    def __init__(self, widget: QWidget, config: Config):
         self.widget = widget
         self.config = config
         self.border_width = config.data.border.width

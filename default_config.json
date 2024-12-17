@@ -1,0 +1,24 @@
+{
+  "position": {
+    "x": 100,
+    "y": 100
+  },
+  "size": {
+    "width": 320,
+    "height": 240
+  },
+  "opacity": 1.0,
+  "color": "#FF0000",
+  "border": {
+    "width": 4
+  },
+  "last_image": null,
+  "sound_type": "SUCCESS",
+  "enable_notification": true,
+  "enable_sound": true,
+  "custom_sound": {
+    "path": null,
+    "start": 0,
+    "duration": 3
+  }
+}

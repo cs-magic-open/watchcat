@@ -39,7 +39,7 @@ class TrayManager:
         menu.addAction(select_image_action)
 
         # Reload last image if available
-        if self.config["last_image"]:
+        if self.config.data.last_image:
             reload_action = QAction("重新加载上次图片", menu)
             reload_action.triggered.connect(self.parent.reload_last_image)
             menu.addAction(reload_action)
@@ -53,7 +53,7 @@ class TrayManager:
         for sound_type in SoundType:
             action = QAction(sound_type.value, sound_menu)
             action.setCheckable(True)
-            action.setChecked(self.config["sound_type"] == sound_type.name)
+            action.setChecked(self.config.data.sound_type == sound_type.name)
             action.triggered.connect(lambda checked, st=sound_type: self.change_sound_type(st))
             sound_menu.addAction(action)
 
@@ -66,6 +66,20 @@ class TrayManager:
         menu.addMenu(sound_menu)
 
         menu.addSeparator()
+
+        # Add notification toggle
+        notification_action = QAction("启用通知", menu)
+        notification_action.setCheckable(True)
+        notification_action.setChecked(self.config.data.enable_notification)
+        notification_action.triggered.connect(self.toggle_notification)
+        menu.addAction(notification_action)
+
+        # Add sound toggle
+        sound_action = QAction("启用声音", menu)
+        sound_action.setCheckable(True)
+        sound_action.setChecked(self.config.data.enable_sound)
+        sound_action.triggered.connect(self.toggle_sound)
+        menu.addAction(sound_action)
 
         # Toggle visibility action
         self.toggle_action = QAction("Hide Draw", menu)
@@ -86,8 +100,8 @@ class TrayManager:
         """Update status text"""
         status_parts = []
 
-        if target_image is not None and self.config["last_image"]:
-            filename = Path(self.config["last_image"]).name
+        if target_image is not None and self.config.data.last_image:
+            filename = Path(self.config.data.last_image).name
             status_parts.append(f"图片: {filename}")
 
             h, w = target_image.shape[:2]
@@ -111,7 +125,7 @@ class TrayManager:
 
     def change_sound_type(self, sound_type: SoundType):
         """更改提示音类型"""
-        self.config["sound_type"] = sound_type.name
+        self.config.data.sound_type = sound_type.name
         
         # 更新菜单项选中状态
         sound_menu = None
@@ -123,6 +137,16 @@ class TrayManager:
         if sound_menu:
             for action in sound_menu.actions():
                 action.setChecked(action.text() == sound_type.value)
+
+    def toggle_notification(self, checked):
+        """Toggle notification setting"""
+        self.config.data.enable_notification = checked
+        self.config.save()
+
+    def toggle_sound(self, checked):
+        """Toggle sound setting"""
+        self.config.data.enable_sound = checked
+        self.config.save()
 
     def show_custom_sound_settings(self):
         """显示自定义音乐设置对话框"""
@@ -138,9 +162,9 @@ class TrayManager:
         # 显示对话框并处理结果
         if dialog.exec() == QDialog.DialogCode.Accepted:
             # 保存设置
-            self.config["custom_sound"] = dialog.get_settings()
+            self.config.data.custom_sound = dialog.get_settings()
             # 如果当前选择的是自定义音乐，更新一下设置
-            if self.config["sound_type"] == SoundType.CUSTOM.name:
+            if self.config.data.sound_type == SoundType.CUSTOM.name:
                 self.change_sound_type(SoundType.CUSTOM)
 
 
@@ -179,7 +203,7 @@ class CustomSoundDialog(QDialog):
 
         # 当前音乐文件
         current_file = QHBoxLayout()
-        self.file_label = QLabel(self.config["custom_sound"]["path"] or "未选择音乐文件")
+        self.file_label = QLabel(self.config.data.custom_sound.path or "未选择音乐文件")
         self.file_label.setWordWrap(True)
         select_btn = QPushButton("选择文件")
         select_btn.clicked.connect(self.select_file)
@@ -195,7 +219,7 @@ class CustomSoundDialog(QDialog):
         start_layout.addWidget(QLabel("开始时间(秒):"))
         self.start_spin = QDoubleSpinBox()
         self.start_spin.setRange(0, 3600)  # 最长1小时
-        self.start_spin.setValue(self.config["custom_sound"]["start"])
+        self.start_spin.setValue(self.config.data.custom_sound.start)
         self.start_spin.setDecimals(1)
         start_layout.addWidget(self.start_spin)
         time_settings.addLayout(start_layout)
@@ -205,7 +229,7 @@ class CustomSoundDialog(QDialog):
         duration_layout.addWidget(QLabel("持续时间(秒):"))
         self.duration_spin = QDoubleSpinBox()
         self.duration_spin.setRange(0.1, 10)  # 最短0.1秒，最长10秒
-        self.duration_spin.setValue(self.config["custom_sound"]["duration"])
+        self.duration_spin.setValue(self.config.data.custom_sound.duration)
         self.duration_spin.setDecimals(1)
         duration_layout.addWidget(self.duration_spin)
         time_settings.addLayout(duration_layout)

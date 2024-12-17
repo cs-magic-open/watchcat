@@ -31,8 +31,8 @@ class WindowPainter:
             self.widget.height() - self.border_width,
         )
         painter.drawRect(rect)
-        logger.debug(f"绘制边框: rect={rect}, color={self.config['color']}, width={self.border_width}")
+        logger.debug(f"绘制边框: rect={rect}, color={self.config.data.color}, width={self.border_width}")
 
     @property
     def border_width(self):
-        return self.config["border"]["width"]
+        return self.config.data.border.width

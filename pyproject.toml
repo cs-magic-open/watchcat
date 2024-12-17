@@ -21,6 +21,7 @@ plyer = "^2.1.0"
 notify-py = "^0.3.43"
 simpleaudio = "^1.0.4"
 pydub = "^0.25.1"
+pydantic = "^2.10.3"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.0"

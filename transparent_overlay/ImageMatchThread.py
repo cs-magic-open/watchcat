@@ -32,23 +32,26 @@ class ImageMatchThread(QThread):
         self.target_image = image
         self.last_match = None
 
-    def send_notification(self, title, message):
+    def on_match(self, title, message):
         """跨平台发送系统通知和提示音"""
+        # 检查是否启用通知
+        if self.config.data.enable_notification:
+            # 使用 notify-py 发送通知（支持 Windows、Linux、macOS）
+            logger.info(f"发送通知: {title} - {message}")
+            notification = Notify()
+            notification.title = title
+            notification.message = message
+            notification.application_name = "Auto GUI"
+            notification.send(block=False)  # 改为非阻塞，避免声音延迟
 
-        # 使用 notify-py 发送通知（支持 Windows、Linux、macOS）
-        logger.info(f"发送通知: {title} - {message}")
-        notification = Notify()
-        notification.title = title
-        notification.message = message
-        notification.application_name = "Auto GUI"
-        notification.send(block=False)  # 改为非阻塞，避免声音延迟
-
-        # 播放提示音
-        try:
-            sound_type = SoundType[self.config["sound_type"]]
-            SoundPlayer.play_sound(sound_type, self.config)
-        except Exception as e:
-            logger.warning(f"播放提示音失败: {e}")
+        # 检查是否启用声音
+        if self.config.data.enable_sound:
+            # 播放提示音
+            try:
+                sound_type = SoundType[self.config.data.sound_type]
+                SoundPlayer.play_sound(sound_type, self.config.data)
+            except Exception as e:
+                logger.warning(f"播放提示音失败: {e}")
 
     def run(self):
         """线程主循环"""
@@ -83,7 +86,7 @@ class ImageMatchThread(QThread):
 
                 # 检查是否从未匹配状态转变为匹配状态
                 if not self.last_match_status:
-                    self.send_notification("找到匹配", f"匹配度: {max_val*100:.1f}%")
+                    self.on_match("找到匹配", f"匹配度: {max_val*100:.1f}%")
 
                 self.last_match_status = True
                 self.match_found.emit((x, y, w, h))

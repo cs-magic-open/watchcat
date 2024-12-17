@@ -34,6 +34,9 @@ class TransparentOverlay(QWidget):
         self.init_ui()
         self.setup_tray()
 
+        # 确保程序退出时清理资源
+        app.aboutToQuit.connect(self.cleanup)
+
         # 尝试加载上次的图片
         if self.config.get("last_image"):
             last_image_path = self.config["last_image"]
@@ -46,17 +49,87 @@ class TransparentOverlay(QWidget):
                 self.save_config()
 
     def init_ui(self):
+        # 设置基本窗口标志
         self.setWindowFlags(
             Qt.WindowType.FramelessWindowHint
             | Qt.WindowType.Tool
             | Qt.WindowType.WindowStaysOnTopHint
+            | Qt.WindowType.WindowDoesNotAcceptFocus
         )
+
+        # 设置窗口属性
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
 
         if sys.platform == "darwin":
             self.setAttribute(Qt.WidgetAttribute.WA_MacAlwaysShowToolWindow)
 
-        self.center_window()
+            # 设置窗口层级高于 Dock
+            import AppKit
+            import Quartz
+
+            # 创建一个新的 NSPanel
+            panel = AppKit.NSPanel.alloc().init()
+
+            # 设置面板样式
+            panel.setStyleMask_(
+                AppKit.NSWindowStyleMaskBorderless
+                | AppKit.NSWindowStyleMaskNonactivatingPanel
+                | AppKit.NSWindowStyleMaskUtilityWindow
+            )
+
+            # 设置面板属性
+            panel.setBackgroundColor_(AppKit.NSColor.clearColor())
+            panel.setFloatingPanel_(True)
+
+            # 使用最高窗口层级
+            panel.setLevel_(
+                Quartz.CGWindowLevelForKey(Quartz.kCGMaximumWindowLevelKey) + 1000
+            )
+
+            # 额外设置，确保在最顶层
+            panel.setHidesOnDeactivate_(False)  # 失去焦点时不隐藏
+            panel.setCanBecomeVisibleWithoutLogin_(True)  # 登录前也可见
+            panel.setAlphaValue_(1.0)
+            panel.setOpaque_(False)
+            panel.setHasShadow_(False)
+            panel.setIgnoresMouseEvents_(True)
+
+            # 设置窗口行为
+            panel.setCollectionBehavior_(
+                AppKit.NSWindowCollectionBehaviorCanJoinAllSpaces
+                | AppKit.NSWindowCollectionBehaviorStationary
+                | AppKit.NSWindowCollectionBehaviorIgnoresCycle
+                | AppKit.NSWindowCollectionBehaviorFullScreenAuxiliary
+            )
+
+            # 获取原始窗口并替换
+            if self.windowHandle():
+                window = self.windowHandle()
+                window_id = window.winId()
+                ns_window = AppKit.NSApp.windowWithWindowNumber_(window_id)
+                if ns_window:
+                    # 复制原始窗口的内容视图
+                    content_view = ns_window.contentView()
+                    panel.setContentView_(content_view)
+
+                    # 设置面板位置和大小
+                    panel.setFrame_display_(ns_window.frame(), True)
+
+                    # 替换原始窗口
+                    ns_window.orderOut_(None)
+                    panel.makeKeyAndOrderFront_(None)
+
+        # 设置位置和大小
+        if self.target_image is None:
+            self.center_window()
+        else:
+            self._update_geometry(
+                self.config["position"]["x"],
+                self.config["position"]["y"],
+                self.config["size"]["width"],
+                self.config["size"]["height"],
+            )
+
         self.show()
 
     def load_config(self):
@@ -86,7 +159,7 @@ class TransparentOverlay(QWidget):
             json.dump(self.config, f, indent=2)
 
     def on_match_found(self, match_result):
-        """处理匹配结果"""
+        """处��匹配结果"""
         # 转换为逻辑像素
         x, y, w, h = [int(v / self.scale_factor) for v in match_result]
 
@@ -206,7 +279,7 @@ class TransparentOverlay(QWidget):
         menu.addSeparator()
 
         # 添加选择图片的动作
-        select_image_action = QAction("选择目标图片", menu)
+        select_image_action = QAction("选择��标图片", menu)
         select_image_action.triggered.connect(self.show_image_picker)
         menu.addAction(select_image_action)
 
@@ -307,7 +380,9 @@ class TransparentOverlay(QWidget):
         if checked:
             if self.target_image is not None:
                 # 先确保线程停止
-                self.match_thread.stop()
+                if self.match_thread.isRunning():
+                    self.match_thread.stop()
+                    self.match_thread.wait()
                 # 重新启动线程
                 self.match_thread.start()
             self.show()
@@ -316,12 +391,24 @@ class TransparentOverlay(QWidget):
         else:
             if self.target_image is not None:
                 self.match_thread.stop()
+                self.match_thread.wait()
             self.hide()
             self.toggle_action.setText("Show Draw")
 
     def closeEvent(self, event):
         """关闭事件处理"""
         logger.info("关闭窗口")
-        if self.target_image is not None:
-            self.match_thread.stop()
+        self.cleanup()
         super().closeEvent(event)
+
+    def cleanup(self):
+        """清理资源"""
+        logger.info("正在清理资源...")
+        if self.match_thread and self.match_thread.isRunning():
+            logger.info("停止匹配线程")
+            self.match_thread.stop()
+            self.match_thread.wait()  # 等待线程完全停止
+
+        if hasattr(self, "sct"):
+            logger.info("关闭屏幕捕获")
+            self.sct.close()

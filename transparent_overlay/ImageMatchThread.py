@@ -55,7 +55,7 @@ class ImageMatchThread(QThread):
 
                 # 添加随机抖动 (±20像素)
                 jitter_x = self.last_match[0] + random.randint(100, 200)
-                jitter_y = self.last_match[1] - random.randint(100, 200)
+                jitter_y = self.last_match[1] - random.randint(0, 100)
 
                 logger.info(
                     f"[{t:.2f}s, {max_val*100:.2f}%] 找到匹配: "

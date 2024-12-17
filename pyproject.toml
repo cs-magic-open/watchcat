@@ -11,6 +11,7 @@ opencv-python = "^4.8.0"
 numpy = "^1.26.0"
 mss = "^9.0.1"
 pyobjc-framework-Cocoa = {version = "^9.2", platform = "darwin"}
+pyobjc-framework-Quartz = {version = "^9.2", platform = "darwin"}
 cs-magic-log = "^0.1.1"
 loguru = "^0.7.3"
 

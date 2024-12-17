@@ -7,6 +7,7 @@ from PyQt6.QtWidgets import QApplication
 
 
 import sys
+import signal
 
 
 def main():
@@ -44,7 +45,25 @@ def main():
     timer.start(500)
     timer.timeout.connect(lambda: None)
 
-    sys.exit(app.exec())
+    def signal_handler(signum, frame):
+        """处理退出信号"""
+        from transparent_overlay.log import logger
+
+        logger.info(f"收到信号: {signum}")
+        # 确保清理资源
+        overlay.cleanup()
+        app.quit()
+
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
+    # ctrl + z
+    signal.signal(signal.SIGTSTP, signal_handler)
+
+    # 使用 try-finally 确保清理
+    try:
+        sys.exit(app.exec())
+    finally:
+        overlay.cleanup()
 
 
 if __name__ == "__main__":

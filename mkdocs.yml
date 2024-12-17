@@ -63,5 +63,7 @@ nav:
   - 开发:
       - 贡献指南: development/contributing.md
       - 开发环境搭建: development/setup.md
+      - UIUX: development/uiux.md
+      - 打包发布: development/distribution.md
   - 常见问题: faq.md
   - 更新日志: changelog.md

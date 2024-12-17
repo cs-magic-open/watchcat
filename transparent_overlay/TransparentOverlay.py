@@ -34,7 +34,7 @@ class TransparentOverlay(QWidget):
         self.init_ui()
         self.setup_tray()
 
-        # 确保程序退出时清理资源
+        # 保程序退出时清理资源
         app.aboutToQuit.connect(self.cleanup)
 
         # 尝试加载上次的图片
@@ -80,18 +80,14 @@ class TransparentOverlay(QWidget):
             # 设置面板属性
             panel.setBackgroundColor_(AppKit.NSColor.clearColor())
             panel.setFloatingPanel_(True)
-
-            # 使用最高窗口层级
             panel.setLevel_(
                 Quartz.CGWindowLevelForKey(Quartz.kCGMaximumWindowLevelKey) + 1000
             )
-
-            # 额外设置，确保在最顶层
-            panel.setHidesOnDeactivate_(False)  # 失去焦点时不隐藏
-            panel.setCanBecomeVisibleWithoutLogin_(True)  # 登录前也可见
             panel.setAlphaValue_(1.0)
             panel.setOpaque_(False)
             panel.setHasShadow_(False)
+
+            # 允许鼠标事件穿透，但保留绘制能力
             panel.setIgnoresMouseEvents_(True)
 
             # 设置窗口行为
@@ -99,7 +95,6 @@ class TransparentOverlay(QWidget):
                 AppKit.NSWindowCollectionBehaviorCanJoinAllSpaces
                 | AppKit.NSWindowCollectionBehaviorStationary
                 | AppKit.NSWindowCollectionBehaviorIgnoresCycle
-                | AppKit.NSWindowCollectionBehaviorFullScreenAuxiliary
             )
 
             # 获取原始窗口并替换
@@ -108,8 +103,11 @@ class TransparentOverlay(QWidget):
                 window_id = window.winId()
                 ns_window = AppKit.NSApp.windowWithWindowNumber_(window_id)
                 if ns_window:
-                    # 复制原始窗口的内容视图
-                    content_view = ns_window.contentView()
+                    # 保存 panel 引用
+                    self._panel = panel
+
+                    # 创建新的内容���图
+                    content_view = AppKit.NSView.alloc().init()
                     panel.setContentView_(content_view)
 
                     # 设置面板位置和大小
@@ -144,7 +142,7 @@ class TransparentOverlay(QWidget):
                 "position": {"x": 100, "y": 100},
                 "size": {"width": 320, "height": 240},
                 "opacity": 1.0,
-                "color": "#FF0000",  # 纯红色
+                "color": "#FF0000",  # ���红色
                 "border": {"width": 4},  # 加粗边框
                 "last_image": None,
             }
@@ -159,7 +157,7 @@ class TransparentOverlay(QWidget):
             json.dump(self.config, f, indent=2)
 
     def on_match_found(self, match_result):
-        """处��匹配结果"""
+        """处理匹配结果"""
         # 转换为逻辑像素
         x, y, w, h = [int(v / self.scale_factor) for v in match_result]
 
@@ -217,17 +215,30 @@ class TransparentOverlay(QWidget):
     def paintEvent(self, event):
         """绘制边框"""
         painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)  # 启用抗锯齿
+
+        # 设置画笔
         pen = QPen(QColor(self.config["color"]))
         pen.setWidth(self.border_width)
+        pen.setStyle(Qt.PenStyle.SolidLine)  # 确保是实线
+        pen.setCapStyle(Qt.PenCapStyle.SquareCap)  # 设置线段端点样式
         painter.setPen(pen)
+
+        # 移除背景
         painter.setBrush(Qt.BrushStyle.NoBrush)
 
-        painter.drawRect(
+        # 绘制边框
+        rect = QRect(
             self.border_width // 2,
             self.border_width // 2,
             self.width() - self.border_width,
             self.height() - self.border_width,
         )
+        painter.drawRect(rect)
+
+        # 如果在 macOS 上，强制更新 NSPanel
+        if sys.platform == "darwin" and hasattr(self, "_panel"):
+            self._panel.display()
 
     def setup_signal_handling(self):
         """Setup signal handlers for graceful shutdown"""
@@ -253,7 +264,7 @@ class TransparentOverlay(QWidget):
         """将窗口居中显示"""
         screen = QApplication.primaryScreen().geometry()
 
-        # 使用逻辑像素计算窗口大小和位置
+        # 使用逻辑���素计算窗口大小和位置
         new_width = 320
         new_height = 240
 
@@ -279,7 +290,7 @@ class TransparentOverlay(QWidget):
         menu.addSeparator()
 
         # 添加选择图片的动作
-        select_image_action = QAction("选择��标图片", menu)
+        select_image_action = QAction("选择目标图片", menu)
         select_image_action.triggered.connect(self.show_image_picker)
         menu.addAction(select_image_action)
 
@@ -376,7 +387,7 @@ class TransparentOverlay(QWidget):
 
     def toggle_visibility(self, checked):
         """切换可见性"""
-        logger.info(f"切换可见性: {checked}")
+        logger.info(f"切换见性: {checked}")
         if checked:
             if self.target_image is not None:
                 # 先确保线程停止

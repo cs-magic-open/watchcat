@@ -10,10 +10,12 @@ PyQt6 = "^6.4.0"
 opencv-python = "^4.8.0"
 numpy = "^1.26.0"
 mss = "^9.0.1"
-pyobjc-framework-Cocoa = {version = "^9.2", platform = "darwin"}
-pyobjc-framework-Quartz = {version = "^9.2", platform = "darwin"}
 cs-magic-log = "^0.1.1"
 loguru = "^0.7.3"
+pyobjc-framework-cocoa = "^10.3.2"
+pyobjc-framework-quartz = "^10.3.2"
+pyobjc-framework-applicationservices = "^10.3.2"
+pyobjc-framework-coretext = "^10.3.2"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.0"

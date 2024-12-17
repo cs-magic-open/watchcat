@@ -2,6 +2,8 @@
 import enum
 import numpy as np
 import simpleaudio as sa
+from pydub import AudioSegment
+import os
 
 
 class SoundType(enum.Enum):
@@ -11,10 +13,12 @@ class SoundType(enum.Enum):
     SUCCESS = "成功提示音"
     ERROR = "错误提示音"
     MARIO = "马里奥音效"
+    CUSTOM = "自定义音乐"
 
 
 class SoundPlayer:
     """声音播放器类"""
+    _custom_sound_cache = None  # 缓存加载的自定义音频
 
     @staticmethod
     def generate_sine_wave(frequency: float, duration: float, sample_rate: int = 44100) -> np.ndarray:
@@ -33,11 +37,12 @@ class SoundPlayer:
         return note.astype(np.int16)
 
     @classmethod
-    def play_sound(cls, sound_type: SoundType) -> None:
+    def play_sound(cls, sound_type: SoundType, config=None) -> None:
         """根据类型播放提示音
 
         Args:
             sound_type: 提示音类型
+            config: 配置对象，用于自定义音乐设置
         """
         if sound_type == SoundType.NONE:
             return
@@ -49,6 +54,60 @@ class SoundPlayer:
             cls.play_error()
         elif sound_type == SoundType.MARIO:
             cls.play_mario()
+        elif sound_type == SoundType.CUSTOM and config:
+            cls.play_custom(config)
+
+    @classmethod
+    def play_custom(cls, config) -> None:
+        """播放自定义音乐
+
+        Args:
+            config: 配置对象，包含自定义音乐设置
+        """
+        custom_config = config["custom_sound"]
+        if not custom_config["path"] or not os.path.exists(custom_config["path"]):
+            return
+
+        try:
+            # 检查是否需要重新加载音频
+            if (cls._custom_sound_cache is None or 
+                cls._custom_sound_cache.get("path") != custom_config["path"]):
+                # 加载音频文件
+                audio = AudioSegment.from_file(custom_config["path"])
+                cls._custom_sound_cache = {
+                    "path": custom_config["path"],
+                    "audio": audio
+                }
+            else:
+                audio = cls._custom_sound_cache["audio"]
+
+            # 提取指定区间
+            start_ms = int(custom_config["start"] * 1000)  # 转换为毫秒
+            duration_ms = int(custom_config["duration"] * 1000)
+            segment = audio[start_ms:start_ms + duration_ms]
+
+            # 导出为临时文件并播放
+            segment = segment.set_channels(1)  # 转换为单声道
+            samples = np.array(segment.get_array_of_samples())
+            
+            # 确保音量适中
+            max_sample = np.max(np.abs(samples))
+            if max_sample > 0:
+                scale = min(32767 / max_sample, 1.0)
+                samples = (samples * scale).astype(np.int16)
+            
+            # 播放音频
+            play_obj = sa.play_buffer(
+                samples,
+                num_channels=1,
+                bytes_per_sample=2,
+                sample_rate=segment.frame_rate
+            )
+            play_obj.stop_on_destroy = True
+
+        except Exception as e:
+            from transparent_overlay.log import logger
+            logger.warning(f"播放自定义音乐失败: {e}")
 
     @classmethod
     def play_beep(cls, frequency: float = 440, duration: float = 0.25) -> None:

@@ -17,6 +17,7 @@ pyobjc-framework-coretext = "^10.3.2"
 plyer = "^2.1.0"
 notify-py = "^0.3.43"
 simpleaudio = "^1.0.4"
+pydub = "^0.25.1"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.0"

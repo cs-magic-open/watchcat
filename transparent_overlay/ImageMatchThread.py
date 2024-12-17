@@ -46,7 +46,7 @@ class ImageMatchThread(QThread):
         # 播放提示音
         try:
             sound_type = SoundType[self.config["sound_type"]]
-            SoundPlayer.play_sound(sound_type)
+            SoundPlayer.play_sound(sound_type, self.config)
         except Exception as e:
             logger.warning(f"播放提示音失败: {e}")
 

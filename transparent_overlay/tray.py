@@ -1,11 +1,13 @@
 from pathlib import Path
 from typing import TYPE_CHECKING
+import sys
 
 from PyQt6.QtGui import QAction, QIcon
-from PyQt6.QtWidgets import QMenu, QSystemTrayIcon
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QMenu, QSystemTrayIcon, QFileDialog, QDialog, QVBoxLayout, QHBoxLayout, QLabel, QDoubleSpinBox, QPushButton, QWidget
 
 from transparent_overlay.config import Config
-from transparent_overlay.sounds import SoundType
+from transparent_overlay.sounds import SoundType, SoundPlayer
 
 if TYPE_CHECKING:
     from transparent_overlay.TransparentOverlay import TransparentOverlay
@@ -46,7 +48,6 @@ class TrayManager:
 
         # 添加声音设置子菜单
         sound_menu = QMenu("提示音设置", menu)
-        sound_group = QMenu(sound_menu)
         
         # 创建声音选择动作组
         for sound_type in SoundType:
@@ -55,6 +56,12 @@ class TrayManager:
             action.setChecked(self.config["sound_type"] == sound_type.name)
             action.triggered.connect(lambda checked, st=sound_type: self.change_sound_type(st))
             sound_menu.addAction(action)
+
+        # 添加自定义音乐设置选项
+        sound_menu.addSeparator()
+        custom_settings_action = QAction("自定义音乐设置...", sound_menu)
+        custom_settings_action.triggered.connect(self.show_custom_sound_settings)
+        sound_menu.addAction(custom_settings_action)
         
         menu.addMenu(sound_menu)
 
@@ -116,3 +123,140 @@ class TrayManager:
         if sound_menu:
             for action in sound_menu.actions():
                 action.setChecked(action.text() == sound_type.value)
+
+    def show_custom_sound_settings(self):
+        """显示自定义音乐设置对话框"""
+        dialog = CustomSoundDialog(self.config)
+        
+        # 将对话框移动到屏幕中央
+        screen = self.parent.app.primaryScreen().geometry()
+        dialog_size = dialog.sizeHint()
+        x = screen.center().x() - dialog_size.width() // 2
+        y = screen.center().y() - dialog_size.height() // 2
+        dialog.move(x, y)
+        
+        # 显示对话框并处理结果
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            # 保存设置
+            self.config["custom_sound"] = dialog.get_settings()
+            # 如果当前选择的是自定义音乐，更新一下设置
+            if self.config["sound_type"] == SoundType.CUSTOM.name:
+                self.change_sound_type(SoundType.CUSTOM)
+
+
+class CustomSoundDialog(QDialog):
+    """自定义音乐设置对话框"""
+    def __init__(self, config: Config, parent=None):
+        super().__init__(parent)
+        self.config = config
+        
+        # 设置窗口标志
+        self.setWindowFlags(
+            Qt.WindowType.Window |
+            Qt.WindowType.WindowStaysOnTopHint
+        )
+        
+        # macOS 特殊处理
+        if sys.platform == "darwin":
+            import AppKit
+            self._app = AppKit.NSApplication.sharedApplication()
+            self._original_activation_policy = self._app.activationPolicy()
+            self._app.setActivationPolicy_(AppKit.NSApplicationActivationPolicyRegular)
+        
+        self.setup_ui()
+
+    def closeEvent(self, event):
+        """关闭事件处理"""
+        # 恢复 macOS 的激活策略
+        if sys.platform == "darwin":
+            self._app.setActivationPolicy_(self._original_activation_policy)
+        super().closeEvent(event)
+
+    def setup_ui(self):
+        """设置UI"""
+        self.setWindowTitle("自定义音乐设置")
+        layout = QVBoxLayout()
+
+        # 当前音乐文件
+        current_file = QHBoxLayout()
+        self.file_label = QLabel(self.config["custom_sound"]["path"] or "未选择音乐文件")
+        self.file_label.setWordWrap(True)
+        select_btn = QPushButton("选择文件")
+        select_btn.clicked.connect(self.select_file)
+        current_file.addWidget(self.file_label)
+        current_file.addWidget(select_btn)
+        layout.addLayout(current_file)
+
+        # 开始时间和持续时间设置
+        time_settings = QHBoxLayout()
+        
+        # 开始时间
+        start_layout = QHBoxLayout()
+        start_layout.addWidget(QLabel("开始时间(秒):"))
+        self.start_spin = QDoubleSpinBox()
+        self.start_spin.setRange(0, 3600)  # 最长1小时
+        self.start_spin.setValue(self.config["custom_sound"]["start"])
+        self.start_spin.setDecimals(1)
+        start_layout.addWidget(self.start_spin)
+        time_settings.addLayout(start_layout)
+        
+        # 持续时间
+        duration_layout = QHBoxLayout()
+        duration_layout.addWidget(QLabel("持续时间(秒):"))
+        self.duration_spin = QDoubleSpinBox()
+        self.duration_spin.setRange(0.1, 10)  # 最短0.1秒，最长10秒
+        self.duration_spin.setValue(self.config["custom_sound"]["duration"])
+        self.duration_spin.setDecimals(1)
+        duration_layout.addWidget(self.duration_spin)
+        time_settings.addLayout(duration_layout)
+        
+        layout.addLayout(time_settings)
+
+        # 测试按钮
+        test_btn = QPushButton("测试")
+        test_btn.clicked.connect(self.test_sound)
+        layout.addWidget(test_btn)
+
+        # 确定和取消按钮
+        buttons = QHBoxLayout()
+        ok_btn = QPushButton("确定")
+        ok_btn.clicked.connect(self.accept)
+        cancel_btn = QPushButton("取消")
+        cancel_btn.clicked.connect(self.reject)
+        buttons.addWidget(ok_btn)
+        buttons.addWidget(cancel_btn)
+        layout.addLayout(buttons)
+
+        self.setLayout(layout)
+
+    def select_file(self):
+        """选择音乐文件"""
+        file_name, _ = QFileDialog.getOpenFileName(
+            self,
+            "选择音乐文件",
+            "",
+            "Audio Files (*.mp3 *.wav *.m4a *.ogg);;All Files (*.*)"
+        )
+        if file_name:
+            self.file_label.setText(file_name)
+
+    def test_sound(self):
+        """测试当前设置的音效"""
+        # 创建临时配置
+        temp_config = {
+            "custom_sound": {
+                "path": self.file_label.text(),
+                "start": self.start_spin.value(),
+                "duration": self.duration_spin.value()
+            }
+        }
+        # 播放测试音效
+        SoundPlayer.play_sound(SoundType.CUSTOM, temp_config)
+
+    def get_settings(self):
+        """获取设置值"""
+        return {
+            "path": self.file_label.text() if self.file_label.text() != "未选择音乐文件" else None,
+            "start": self.start_spin.value(),
+            "duration": self.duration_spin.value()
+        }

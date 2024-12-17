@@ -21,6 +21,11 @@ class Config:
                 "border": {"width": 4},
                 "last_image": None,
                 "sound_type": "SUCCESS",  # 默认使用成功提示音
+                "custom_sound": {
+                    "path": None,  # 本地音乐文件路径
+                    "start": 0,    # 开始时间（秒）
+                    "duration": 3  # 持续时间（秒）
+                }
             }
 
     def save(self):

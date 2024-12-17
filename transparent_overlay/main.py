@@ -3,7 +3,7 @@ import json
 import signal
 from pathlib import Path
 from PyQt6.QtWidgets import QApplication, QWidget
-from PyQt6.QtCore import Qt, QPoint, QTimer
+from PyQt6.QtCore import Qt, QPoint, QTimer, QRect
 from PyQt6.QtGui import QPainter, QColor, QPen
 
 class TransparentOverlay(QWidget):
@@ -57,27 +57,24 @@ class TransparentOverlay(QWidget):
         if sys.platform == 'darwin':
             self.setAttribute(Qt.WidgetAttribute.WA_MacAlwaysShowToolWindow)
         
-        # Calculate border adjustment
-        border_width = self.config['border']['width']  # Should match pen width in paintEvent
+        # Calculate border adjustment - window needs to be larger to accommodate border
+        border_width = self.config['border']['width']
         
-        # Set geometry from config, adjusted for border
+        # Set geometry from config - window size includes border
         self.setGeometry(
-            self.config["position"]["x"] - border_width // 2,
-            self.config["position"]["y"] - border_width // 2,
-            self.config["size"]["width"] + border_width,
-            self.config["size"]["height"] + border_width
+            self.config["position"]["x"] - border_width,  # 向左扩展边框宽度
+            self.config["position"]["y"] - border_width,  # 向上扩展边框宽度
+            self.config["size"]["width"] + (border_width * 2),   # 左右各扩展边框宽度
+            self.config["size"]["height"] + (border_width * 2)   # 上下各扩展边框宽度
         )
         
         # Set window opacity
         self.setWindowOpacity(self.config["opacity"])
         
-        # 显示窗口
         self.show()
-        
 
     def paintEvent(self, event):
         painter = QPainter(self)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         
         # Set the border color from config
         color = QColor(self.config["color"])
@@ -87,18 +84,19 @@ class TransparentOverlay(QWidget):
         
         # Set the pen for border
         pen = QPen(color)
-        pen.setWidth(self.config['border']['width'])
+        border_width = self.config['border']['width']
+        pen.setWidth(border_width)
+        pen.setJoinStyle(Qt.PenJoinStyle.MiterJoin)
         painter.setPen(pen)
         
-        # Draw a rectangle with border only, adjusted to draw border outside
-        pen_width = pen.width()
-        adjusted_rect = self.rect().adjusted(
-            pen_width // 2,      # left: move inward by half pen width
-            pen_width // 2,      # top: move inward by half pen width
-            -pen_width // 2,     # right: move inward by half pen width
-            -pen_width // 2      # bottom: move inward by half pen width
+        # Draw the border exactly at the content box
+        content_rect = QRect(
+            border_width // 2,                    # 从边框宽度处开始
+            border_width // 2,
+            self.config["size"]["width"] + border_width,    # 保持原始内容大小
+            self.config["size"]["height"] + border_width
         )
-        painter.drawRect(adjusted_rect)
+        painter.drawRect(content_rect)
 
 def main():
     # 在创建 QApplication 之前设置 dock 隐藏

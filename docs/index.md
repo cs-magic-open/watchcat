@@ -1,46 +1,47 @@
 # WatchCat
 
-> 🚀 一个强大的桌面自动化工具，基于透明覆盖窗口技术
+> 🚀 完全基于 AI 开发的一款桌面自动化工具，基于透明覆盖窗口技术
 
 [![GitHub stars](https://img.shields.io/github/stars/cs-magic-open/watchcat?style=social)](https://github.com/cs-magic-open/watchcat)
-[![Poetry](https://img.shields.io/badge/poetry-managed-blue)](https://python-poetry.org/)
-[![PyQt6](https://img.shields.io/badge/GUI-PyQt6-green)](https://www.riverbankcomputing.com/software/pyqt/)
+[![Release](https://img.shields.io/github/v/release/cs-magic-open/watchcat)](https://github.com/cs-magic-open/watchcat/releases)
 
 <!-- <iframe src="//player.bilibili.com/player.html?bvid=BV11CB5YWEyM&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="width: 100%; height: 500px;"> </iframe> -->
 
+## ✨ 简介
+
+WatchCat 是一个简单易用的桌面自动化工具，它能帮助你：
+
+- 🔍 **监控屏幕变化**：自动检测屏幕上的特定内容
+- 🔔 **及时通知提醒**：当发现匹配时立即通知你
+- 🤖 **自动化操作**：可以触发自定义的自动化操作
+
 ## 🎯 特性
 
-- 💫 透明覆盖窗口
-- 🤖 桌面自动化
-- 🎨 现代化 GUI 界面
-- 🔧 可扩展的插件系统
-- 📦 跨平台支持
+- 💫 **智能识别**：基于 AI 的图像识别技术
+- 🎨 **简单易用**：现代化的图形界面，无需编程知识
+- 🔧 **灵活配置**：可自定义监控区域和通知方式
+- 📦 **跨平台**：支持 macOS（Windows 和 Linux 即将支持）
 
 ## 💡 使用场景
 
-- 桌面自动化测试
-- 界面交互录制
-- 自动化工作流
-- 屏幕监控与分析
+- 📥 **下载监控**：及时知道下载完成
+- 🎮 **游戏辅助**：自动检测游戏中的特定场景
+- 📊 **数据监控**：监控仪表盘的数据变化
+- 🔄 **工作流自动化**：自动化重复性的操作
 
-## 🛠️ 技术栈
+## 🚀 开始使用
 
-- **PyQt6**: 现代化的 GUI 框架
-- **Poetry**: Python 依赖管理
-- **OpenCV**: 图像处理
-- **NumPy**: 数据处理
-- **MSS**: 屏幕捕获
+1. [快速上手](getting-started.md)
+2. [下载安装](guide/installation.md)
+3. [查看教程](guide/basic-usage.md)
 
-## 📚 文档导航
+## 🤝 参与贡献
 
-- [快速开始](getting-started.md) - 5 分钟上手指南
-- [基本使用](guide/basic-usage.md) - 核心功能介绍
-- [高级功能](guide/advanced.md) - 进阶使用技巧
-- [API 参考](api/qt-interface.md) - 详细 API 文档
+WatchCat 是一个开源项目，我们欢迎任何形式的贡献：
 
-## 🤝 贡献
-
-欢迎贡献代码！请查看我们的[贡献指南](development/contributing.md)。
+- 🐛 [报告问题](https://github.com/cs-magic-open/watchcat/issues)
+- 📝 [改进文档](development/contributing.md)
+- 💻 [贡献代码](development/setup.md)
 
 ## 📄 许可证
 

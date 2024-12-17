@@ -58,14 +58,10 @@ nav:
   - 主页: index.md
   - 快速开始: getting-started.md
   - 用户指南:
-    - 安装: guide/installation.md
-    - 基本使用: guide/basic-usage.md
-    - 高级功能: guide/advanced.md
-  - API参考:
-    - PyQt界面: api/qt-interface.md
-    - 自动化功能: api/automation.md
+      - 安装: guide/installation.md
+      - 基本使用: guide/basic-usage.md
   - 开发:
-    - 贡献指南: development/contributing.md
-    - 开发环境搭建: development/setup.md
+      - 贡献指南: development/contributing.md
+      - 开发环境搭建: development/setup.md
   - 常见问题: faq.md
   - 更新日志: changelog.md

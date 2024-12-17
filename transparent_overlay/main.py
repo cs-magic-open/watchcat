@@ -61,23 +61,51 @@ class TransparentOverlay(QWidget):
             Qt.WindowType.Tool |
             Qt.WindowType.WindowStaysOnTopHint |
             Qt.WindowType.WindowDoesNotAcceptFocus |
-            Qt.WindowType.NoDropShadowWindowHint
+            Qt.WindowType.NoDropShadowWindowHint |
+            Qt.WindowType.BypassWindowManagerHint
         )
         
-        # 在 macOS 上特别设置，使窗口不出现在 Dock 中
+        # 在 macOS 上特别设置
         if sys.platform == 'darwin':
             self.setAttribute(Qt.WidgetAttribute.WA_MacAlwaysShowToolWindow)
+            self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
+            self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+            
             # 尝试使用 Cocoa API 来设置窗口属性
             try:
                 from Foundation import NSWindow
+                import AppKit
+                
+                # 获取原生窗口句柄
                 window = self.windowHandle().winId()
                 if hasattr(window, 'setCollectionBehavior_'):
-                    window.setCollectionBehavior_(1 << 8)  # NSWindowCollectionBehaviorTransient
-            except (ImportError, AttributeError):
-                pass
-        
-        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-        self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
+                    # 设置窗口行为
+                    window.setCollectionBehavior_(
+                        AppKit.NSWindowCollectionBehaviorCanJoinAllSpaces |
+                        AppKit.NSWindowCollectionBehaviorTransient |
+                        AppKit.NSWindowCollectionBehaviorIgnoresCycle
+                    )
+                    
+                    # 设置窗口层级为状态项层级
+                    window.setLevel_(AppKit.NSStatusWindowLevel)
+                    
+                    # 禁用窗口阴影
+                    window.setHasShadow_(False)
+                    
+                    # 设置窗口为非激活状态
+                    window.setCanBecomeKeyWindow_(False)
+                    window.setCanBecomeMainWindow_(False)
+                    
+                    # 允许窗口显示但不接受任何输入
+                    window.setIgnoresMouseEvents_(True)
+                    window.setAcceptsMouseMovedEvents_(False)
+                    
+                    # 确保窗口始终可见
+                    window.setOpaque_(False)
+                    window.setBackgroundColor_(AppKit.NSColor.clearColor())
+                
+            except (ImportError, AttributeError) as e:
+                print(f"Warning: Could not set all native window properties: {e}")
         
         # Set geometry from config
         self.setGeometry(
@@ -110,12 +138,20 @@ def main():
         try:
             from Foundation import NSBundle
             import AppKit
-            info = NSBundle.mainBundle().infoDictionary()
-            info['LSUIElement'] = '1'  # 或者使用 True
             
-            # 确保 NSApplication 已经初始化并设置为后台应用
+            # 初始化 NSApplication 并设置为后台应用
             app = AppKit.NSApplication.sharedApplication()
             app.setActivationPolicy_(AppKit.NSApplicationActivationPolicyAccessory)
+            
+            # 设置为后台应用
+            info = NSBundle.mainBundle().infoDictionary()
+            info['LSUIElement'] = '1'
+            
+            # 禁用所有默认的应用程序行为
+            app.setActivationPolicy_(AppKit.NSApplicationActivationPolicyProhibited)
+            NSApp = AppKit.NSApplication.sharedApplication()
+            # NSApp.setPresentsAutomaticallyFullScreen_(False)
+            
         except ImportError:
             print("Warning: pyobjc not installed. Please install with: pip install pyobjc-framework-Cocoa")
     

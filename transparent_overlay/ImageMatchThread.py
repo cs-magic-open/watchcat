@@ -3,6 +3,9 @@ import time
 import cv2
 import numpy as np
 from PyQt6.QtCore import QThread, pyqtSignal
+import subprocess
+
+
 
 from transparent_overlay.log import logger
 
@@ -16,6 +19,7 @@ class ImageMatchThread(QThread):
         self.target_image = None
         self.running = False
         self.last_match = None  # 存储上次匹配位置
+        self.last_match_status = False  # 跟踪上一次的匹配状态
 
     def set_target(self, image):
         """设置目标图片"""
@@ -23,6 +27,11 @@ class ImageMatchThread(QThread):
         logger.info(f"设置目标图片: {w}x{h}")
         self.target_image = image
         self.last_match = None
+
+    def send_notification(self, title, message):
+        """发送系统通知"""
+        apple_script = f'display notification "{message}" with title "{title}"'
+        subprocess.run(['osascript', '-e', apple_script])
 
     def run(self):
         """线程主循环"""
@@ -50,19 +59,24 @@ class ImageMatchThread(QThread):
                 if self.last_match is None:
                     self.last_match = (x, y)
 
-                # 添加随机抖动 (±20像素)
-                # x = self.last_match[0] + random.randint(100, 200)
-                # y = self.last_match[1] - random.randint(0, 100)
-
                 logger.info(
                     f"[{t:.2f}s, {max_val*100:.2f}%] 找到匹配: "
                     f"位置({x}, {y}), 大小({w}x{h})"
                 )
 
-                # 发送抖动后的位置
+                # 检查是否从未匹配状态转变为匹配状态
+                if not self.last_match_status:
+                    self.send_notification(
+                        "找到匹配",
+                        f"匹配度: {max_val*100:.1f}%"
+                    )
+
+                self.last_match_status = True
                 self.match_found.emit((x, y, w, h))
             else:
                 logger.warning(f"[{t:.2f}s, {max_val*100:.2f}%] 未找到匹配")
+
+                self.last_match_status = False
 
             self.msleep(200)
 

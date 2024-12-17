@@ -22,7 +22,18 @@ class TrayManager:
     def setup_tray(self):
         """Setup system tray icon and menu"""
         self.tray = QSystemTrayIcon(self.parent)
-        self.tray.setIcon(QIcon.fromTheme("edit-cut"))
+        # 尝试加载 SVG 图标
+        icon_path = str(Path(__file__).parent / "resources" / "icon.svg")
+        if Path(icon_path).exists():
+            icon = QIcon(icon_path)
+            if not icon.isNull():
+                self.tray.setIcon(icon)
+            else:
+                print(f"Warning: Failed to load icon from {icon_path}")
+                self.tray.setIcon(QIcon.fromTheme("visibility", QIcon.fromTheme("eye")))
+        else:
+            print(f"Warning: Icon file not found at {icon_path}")
+            self.tray.setIcon(QIcon.fromTheme("visibility", QIcon.fromTheme("eye")))
 
         menu = QMenu()
 

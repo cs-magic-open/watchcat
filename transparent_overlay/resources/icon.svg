@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .icon { fill: #2c3e50; }
+    @media (prefers-color-scheme: dark) {
+      .icon { fill: #ecf0f1; }
+    }
+  </style>
+  <g class="icon">
+    <!-- Outer circle -->
+    <path d="M16 4C9.373 4 4 9.373 4 16s5.373 12 12 12 12-5.373 12-12S22.627 4 16 4zm0 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S6 21.523 6 16 10.477 6 16 6z"/>
+    <!-- Inner eye shape -->
+    <path d="M16 10c-4.418 0-8 3.582-8 8s3.582 8 8 8 8-3.582 8-8-3.582-8-8-8zm0 2c3.314 0 6 2.686 6 6s-2.686 6-6 6-6-2.686-6-6 2.686-6 6-6z"/>
+    <!-- Center dot -->
+    <circle cx="16" cy="16" r="3"/>
+  </g>
+</svg>

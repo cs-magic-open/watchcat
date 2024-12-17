@@ -1,4 +1,4 @@
-# WatchCat
+# WatchCat <img src="transparent_overlay/resources/icon.svg" width="32" height="32" alt="WatchCat Icon" style="vertical-align: middle" />
 
 ```
   ╭─────────────────────────╮
@@ -50,6 +50,12 @@ WatchCat 是一个基于 PyQt 开发的桌面自动化工具，专注于实时�
 - Poetry（依赖管理）
 - PyQt（GUI 框架）
 - Python 3.x
+
+WatchCat 使用了自适应的 SVG 图标，能够根据系统主题自动切换颜色：
+- 浅色主题：深色图标 (#2c3e50)
+- 深色主题：浅色图标 (#ecf0f1)
+
+图标设计采用了简约现代的风格，象征着程序的监控功能。
 
 ## 项目愿景
 

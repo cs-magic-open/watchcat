@@ -63,26 +63,26 @@ class TrayManager:
 
         menu.addSeparator()
 
-        # 通知设置菜单
-        notification_menu = QMenu("通知设置", menu)
+        # 提醒方式菜单
+        notification_menu = QMenu("提醒方式", menu)
         
 
         # Add notification toggle
-        notification_action = QAction("启用通知", notification_menu)
+        notification_action = QAction("系统通知", notification_menu)
         notification_action.setCheckable(True)
         notification_action.setChecked(self.config.data.enable_notification)
         notification_action.triggered.connect(self.toggle_notification)
         notification_menu.addAction(notification_action)
 
         # Add sound toggle
-        sound_action = QAction("启用声音", notification_menu)
+        sound_action = QAction("声音提醒", notification_menu)
         sound_action.setCheckable(True)
         sound_action.setChecked(self.config.data.enable_sound)
         sound_action.triggered.connect(self.toggle_sound)
         notification_menu.addAction(sound_action)
         
         # 添加声音设置子菜单
-        sound_menu = QMenu("提示音设置", notification_menu)
+        sound_menu = QMenu("声音设置", notification_menu)
         
         # 创建声音选择动作组
         for sound_type in SoundType:
@@ -159,7 +159,7 @@ class TrayManager:
         # 更新菜单项选中状态
         sound_menu = None
         for action in self.tray.contextMenu().actions():
-            if action.text() == "提示音设置":
+            if action.text() == "声音设置":
                 sound_menu = action.menu()
                 break
         

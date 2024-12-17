@@ -26,6 +26,17 @@ jobs:
       run: |
         curl -sSL https://install.python-poetry.org | python3 -
 
+    - name: Install system dependencies (Ubuntu)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y qt6-base-dev libasound2-dev portaudio19-dev python3-dev
+
+    - name: Install system dependencies (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        choco install portaudio
+
     - name: Install dependencies (macOS)
       if: matrix.os == 'macos-latest'
       run: poetry install --with dev,macos
@@ -34,12 +45,6 @@ jobs:
       if: matrix.os != 'macos-latest'
       run: poetry install --with dev --without macos
       
-    - name: Install system dependencies (Ubuntu)
-      if: matrix.os == 'ubuntu-latest'
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y qt6-base-dev
-
     - name: Build with PyInstaller
       run: |
         poetry run pyinstaller --clean --onefile --windowed --name watchcat transparent_overlay/main.py

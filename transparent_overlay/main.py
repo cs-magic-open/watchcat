@@ -59,9 +59,25 @@ class TransparentOverlay(QWidget):
         self.setWindowFlags(
             Qt.WindowType.FramelessWindowHint |
             Qt.WindowType.Tool |
-            Qt.WindowType.WindowStaysOnTopHint
+            Qt.WindowType.WindowStaysOnTopHint |
+            Qt.WindowType.WindowDoesNotAcceptFocus |
+            Qt.WindowType.NoDropShadowWindowHint
         )
+        
+        # 在 macOS 上特别设置，使窗口不出现在 Dock 中
+        if sys.platform == 'darwin':
+            self.setAttribute(Qt.WidgetAttribute.WA_MacAlwaysShowToolWindow)
+            # 尝试使用 Cocoa API 来设置窗口属性
+            try:
+                from Foundation import NSWindow
+                window = self.windowHandle().winId()
+                if hasattr(window, 'setCollectionBehavior_'):
+                    window.setCollectionBehavior_(1 << 8)  # NSWindowCollectionBehaviorTransient
+            except (ImportError, AttributeError):
+                pass
+        
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
         
         # Set geometry from config
         self.setGeometry(
@@ -89,15 +105,30 @@ class TransparentOverlay(QWidget):
         painter.drawRect(self.rect())
 
 def main():
-    app = QApplication(sys.argv)
+    # 在创建 QApplication 之前设置 dock 隐藏
+    if sys.platform == 'darwin':
+        try:
+            from Foundation import NSBundle
+            import AppKit
+            info = NSBundle.mainBundle().infoDictionary()
+            info['LSUIElement'] = '1'  # 或者使用 True
+            
+            # 确保 NSApplication 已经初始化并设置为后台应用
+            app = AppKit.NSApplication.sharedApplication()
+            app.setActivationPolicy_(AppKit.NSApplicationActivationPolicyAccessory)
+        except ImportError:
+            print("Warning: pyobjc not installed. Please install with: pip install pyobjc-framework-Cocoa")
     
-    # Create and show the overlay, passing app reference
+    app = QApplication(sys.argv)
+    app.setQuitOnLastWindowClosed(False)
+    
+    # Create and show the overlay
     overlay = TransparentOverlay(app)
     
     # Enable processing of keyboard interrupts
     timer = QTimer()
-    timer.start(500)  # Time in ms
-    timer.timeout.connect(lambda: None)  # Keep event loop running
+    timer.start(500)
+    timer.timeout.connect(lambda: None)
     
     sys.exit(app.exec())
 
